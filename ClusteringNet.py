@@ -30,11 +30,11 @@ class NetCIFAR100(Nets.Net):
             self._phaseTest     = tf.assign(self._ifTest, True)
             
             # Inputs
-            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
+            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages,
                                                   name='CIFAR100_images')
-            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class20')
-            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class100')
             
             # Net
@@ -98,30 +98,30 @@ class NetCIFAR100(Nets.Net):
 #         net = Nets.VGG(standardized, self._step, self._ifTest, self._layers)
 #         net = Nets.VGGM(standardized, self._step, self._ifTest, self._layers)
         
-        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0),
+                                        activation=Layers.Linear,
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class20)
-        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Fine', dtype=tf.float32)
+        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4,
+                                         biasInit=Layers.ConstInit(0.0),
+                                         activation=Layers.Linear,
+                                         name='FC_Fine', dtype=tf.float32)
         self._layers.append(class100)
-        embedding = Layers.FullyConnected(net.output, outputSize=64, weightInit=Layers.XavierInit, wd=1e-4, \
-                                        biasInit=Layers.ConstInit(0.0), \
-                                        activation=Layers.Tanh, \
-                                        name='FC_embedding', dtype=tf.float32)
+        embedding = Layers.FullyConnected(net.output, outputSize=64, weightInit=Layers.XavierInit, wd=1e-4,
+                                          biasInit=Layers.ConstInit(0.0),
+                                          activation=Layers.Tanh,
+                                          name='FC_embedding', dtype=tf.float32)
         self._layers.append(embedding)
-        multiletClass20 = Layers.FullyConnected(embedding.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='Multilet_Coarse', dtype=tf.float32)
+        multiletClass20 = Layers.FullyConnected(embedding.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4,
+                                                biasInit=Layers.ConstInit(0.0),
+                                                activation=Layers.Linear,
+                                                name='Multilet_Coarse', dtype=tf.float32)
         self._layers.append(multiletClass20)
-        multiletClass100 = Layers.FullyConnected(embedding.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='Multilet_Fine', dtype=tf.float32)
+        multiletClass100 = Layers.FullyConnected(embedding.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4,
+                                                 biasInit=Layers.ConstInit(0.0),
+                                                 activation=Layers.Linear,
+                                                 name='Multilet_Fine', dtype=tf.float32)
         self._layers.append(multiletClass100)
         embedding = tf.nn.l2_normalize(embedding.output, 1)
         
@@ -152,9 +152,9 @@ class NetCIFAR100(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-                                                  global_step=self._step, \
-                                                  decay_steps=self._HParam['DecayAfter'], \
+            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'],
+                                                  global_step=self._step,
+                                                  decay_steps=self._HParam['DecayAfter'],
                                                   decay_rate=0.90) + self._HParam['MinLearningRate']
             self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
             # Initialize all
@@ -175,21 +175,21 @@ class NetCIFAR100(Nets.Net):
                 
                 loss20, loss100, lossMultilet, loss, accu20, accu100, accutri, accumulti, \
                     lossTrash20, lossTrash100, accuTrash20, accuTrash100, step, _ = \
-                    self._sess.run([self._lossClass20, self._lossClass100, self._lossMultilet, self._loss, \
-                                    self._accuracyClass20, self._accuracyClass100, self._accuTriplet, self._accuMultilet, \
-                                    self._lossTrashClass20, self._lossTrashClass100, \
-                                    self._accuracyTrashClass20, self._accuracyTrashClass100, \
-                                    self._step, self._optimizer], \
-                                   feed_dict={self._images: data, \
-                                              self._labelsClass20: label20, \
+                    self._sess.run([self._lossClass20, self._lossClass100, self._lossMultilet, self._loss,
+                                    self._accuracyClass20, self._accuracyClass100, self._accuTriplet, self._accuMultilet,
+                                    self._lossTrashClass20, self._lossTrashClass100,
+                                    self._accuracyTrashClass20, self._accuracyTrashClass100,
+                                    self._step, self._optimizer],
+                                   feed_dict={self._images: data,
+                                              self._labelsClass20: label20,
                                               self._labelsClass100: label100})
                 self._sess.run(self._updateOps)
-                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100, '; LMul:%.3f'% lossMultilet, \
-                      '; L: %.3f'% loss, \
-                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100, \
-                      '; ATri: %.3f'% accutri, '; AMul: %.3f'% accumulti, \
-                      '; lT20: %.3f'% lossTrash20, '; lT100: %.3f'% lossTrash100, \
-                      '; AT20: %.3f'% accuTrash20, '; AT100: %.3f'% accuTrash100, \
+                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100, '; LMul:%.3f'% lossMultilet,
+                      '; L: %.3f'% loss,
+                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100,
+                      '; ATri: %.3f'% accutri, '; AMul: %.3f'% accumulti,
+                      '; lT20: %.3f'% lossTrash20, '; lT100: %.3f'% lossTrash100,
+                      '; AT20: %.3f'% accuTrash20, '; AT100: %.3f'% accuTrash100,
                       end='')
                 
                 if step % self._HParam['ValidateAfter'] == 0: 
@@ -224,13 +224,13 @@ class NetCIFAR100(Nets.Net):
             data, label20, label100 = next(genTest)
             loss20, loss100, lossMultilet, loss, accu20, accu100, accutri, accumulti, \
                 lossTrash20, lossTrash100, accuTrash20, accuTrash100 = \
-                self._sess.run([self._lossClass20, self._lossClass100, self._lossMultilet, self._loss, \
-                                self._accuracyClass20, self._accuracyClass100, \
-                                self._accuTriplet, self._accuMultilet, \
+                self._sess.run([self._lossClass20, self._lossClass100, self._lossMultilet, self._loss,
+                                self._accuracyClass20, self._accuracyClass100,
+                                self._accuTriplet, self._accuMultilet,
                                 self._lossTrashClass20, self._lossTrashClass100, 
-                                self._accuracyTrashClass20, self._accuracyTrashClass100], \
-                               feed_dict={self._images: data, \
-                                          self._labelsClass20: label20, \
+                                self._accuracyTrashClass20, self._accuracyTrashClass100],
+                               feed_dict={self._images: data,
+                                          self._labelsClass20: label20,
                                           self._labelsClass100: label100})
             totalLoss20       += loss20
             totalLoss100      += loss100
@@ -256,17 +256,17 @@ class NetCIFAR100(Nets.Net):
         totalLossTrash100      /= self._HParam['TestSteps']
         totalAccuTrash20      /= self._HParam['TestSteps']
         totalAccuTrash100     /= self._HParam['TestSteps']
-        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100, '; LossMultilet', totalLossMultilet, \
-              '; Loss: ', totalLoss, \
-              '; Accu20: ', totalAccu20, '; Accu100: ', totalAccu100, \
-              '; AccuTriple: ', totalTriplet, '; AccuMultilet: ', totalMultilet, \
-              '; LossTrash20: ', totalLossTrash20, '; LossTrash100: ', totalLossTrash100, \
+        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100, '; LossMultilet', totalLossMultilet,
+              '; Loss: ', totalLoss,
+              '; Accu20: ', totalAccu20, '; Accu100: ', totalAccu100,
+              '; AccuTriple: ', totalTriplet, '; AccuMultilet: ', totalMultilet,
+              '; LossTrash20: ', totalLossTrash20, '; LossTrash100: ', totalLossTrash100,
               '; AccuTrash20: ', totalAccuTrash20, '; AccuTrash100: ', totalAccuTrash100)
         
     def infer(self, data): 
         self._sess.run([self._phaseTest])  
         feature = \
-            self._sess.run(self._embedding, \
+            self._sess.run(self._embedding,
                            feed_dict={self._images: data})
         
         return feature
@@ -284,9 +284,9 @@ class NetCIFAR100(Nets.Net):
         label100 = []
         for _ in range(100): 
             tmpdata, tmplabel20, tmplabel100 = next(genTest)
-            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata, \
-                                                               self._labelsClass20: tmplabel20, \
-                                                               self._labelsClass100: tmplabel100})
+            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata,
+                                                                 self._labelsClass20: tmplabel20,
+                                                                 self._labelsClass100: tmplabel100})
             data.append(tmpdata)
             label20.append(tmplabel20)
             label100.append(tmplabel100)

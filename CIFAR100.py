@@ -18,24 +18,24 @@ NumFineInOneCoarse = 5
 pathTrain = './cifar-100-python/train' # 50000 training data
 pathTest = './cifar-100-python/testCIFAR10'   # 10000 testCIFAR10 data
 
-labelsCoarse = ['aquatic mammals', 'fish', 'flowers', 'food containers', 'fruit and vegetables', \
-                 'household electrical devices', 'household furniture', 'insects', 'large carnivores', \
-                 'large man-made outdoor things', 'large natural outdoor scenes', \
-                 'large omnivores and herbivores', 'medium-sized mammals', 'non-insect invertebrates', \
-                 'people', 'reptiles', 'small mammals', 'trees', 'vehicles 1', 'vehicles 2']
+labelsCoarse = ['aquatic mammals', 'fish', 'flowers', 'food containers', 'fruit and vegetables',
+                'household electrical devices', 'household furniture', 'insects', 'large carnivores',
+                'large man-made outdoor things', 'large natural outdoor scenes',
+                'large omnivores and herbivores', 'medium-sized mammals', 'non-insect invertebrates',
+                'people', 'reptiles', 'small mammals', 'trees', 'vehicles 1', 'vehicles 2']
 
-labelsFine = ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed', 'bee', 'beetle', 'bicycle', \
-              'bottle', 'bowl', 'boy', 'bridge', 'bus', 'butterfly', 'camel', 'can', 'castle', \
-              'caterpillar', 'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach', \
-              'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin', 'elephant', 'flatfish', \
-              'forest', 'fox', 'girl', 'hamster', 'house', 'kangaroo', 'keyboard', 'lamp', \
-              'lawn_mower', 'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree', \
-              'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree', 'orange', 'orchid', \
-              'otter', 'palm_tree', 'pear', 'pickup_truck', 'pine_tree', 'plain', 'plate', \
-              'poppy', 'porcupine', 'possum', 'rabbit', 'raccoon', 'ray', 'road', 'rocket', \
-              'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk', 'skyscraper', 'snail', \
-              'snake', 'spider', 'squirrel', 'streetcar', 'sunflower', 'sweet_pepper', \
-              'table', 'tank', 'telephone', 'television', 'tiger', 'tractor', 'train', \
+labelsFine = ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed', 'bee', 'beetle', 'bicycle',
+              'bottle', 'bowl', 'boy', 'bridge', 'bus', 'butterfly', 'camel', 'can', 'castle',
+              'caterpillar', 'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach',
+              'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin', 'elephant', 'flatfish',
+              'forest', 'fox', 'girl', 'hamster', 'house', 'kangaroo', 'keyboard', 'lamp',
+              'lawn_mower', 'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree',
+              'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree', 'orange', 'orchid',
+              'otter', 'palm_tree', 'pear', 'pickup_truck', 'pine_tree', 'plain', 'plate',
+              'poppy', 'porcupine', 'possum', 'rabbit', 'raccoon', 'ray', 'road', 'rocket',
+              'rose', 'sea', 'seal', 'shark', 'shrew', 'skunk', 'skyscraper', 'snail',
+              'snake', 'spider', 'squirrel', 'streetcar', 'sunflower', 'sweet_pepper',
+              'table', 'tank', 'telephone', 'television', 'tiger', 'tractor', 'train',
               'trout', 'tulip', 'turtle', 'wardrobe', 'whale', 'willow_tree', 'wolf', 'woman', 'worm']
 
 def getTrainRaw():
@@ -59,13 +59,13 @@ def showData():
         plt.subplot(6, 6, idx+1)
         tmp = random.randint(0, 50000-1)
         plt.imshow(dataTrain[tmp])
-        print('Index: ', idx, ' Type: ', labelsCoarseTrain[tmp], ': ', labelsCoarse[labelsCoarseTrain[tmp]], \
+        print('Index: ', idx, ' Type: ', labelsCoarseTrain[tmp], ': ', labelsCoarse[labelsCoarseTrain[tmp]],
               ', ', labelsFineTrain[tmp], ': ', labelsFine[labelsFineTrain[tmp]])
     for idx in range(24, 36):
         plt.subplot(6, 6, idx+1)
         tmp = random.randint(0, 10000-1)
         plt.imshow(dataTest[tmp])
-        print('Index: ', idx, ' Type: ', labelsCoarseTest[tmp], ': ', labelsCoarse[labelsCoarseTest[tmp]],  \
+        print('Index: ', idx, ' Type: ', labelsCoarseTest[tmp], ': ', labelsCoarse[labelsCoarseTest[tmp]],
               ', ', labelsFineTest[tmp], ': ', labelsFine[labelsFineTest[tmp]])
     plt.figure()
     count = 0
@@ -102,7 +102,7 @@ def loadHDF5():
         labelsCoarseTest  = np.array(f['Test']['labelsCoarse'])
         labelsFineTest    = np.array(f['Test']['labelsFine'])
         
-    return (dataTrain, labelsCoarseTrain, labelsFineTrain, \
+    return (dataTrain, labelsCoarseTrain, labelsFineTrain,
             dataTest, labelsCoarseTest, labelsFineTest)
         
 def loadHDF5Adv():
@@ -114,7 +114,7 @@ def loadHDF5Adv():
         labelsCoarseTest  = np.array(f['Test']['labelsCoarse'])
         labelsFineTest    = np.array(f['Test']['labelsFine'])
         
-    return (dataTrain, labelsCoarseTrain, \
+    return (dataTrain, labelsCoarseTrain,
             dataTest, labelsCoarseTest)
 
 def generators(BatchSize, preprocSize=[32, 32, 3]):
@@ -423,11 +423,11 @@ class NetCIFAR100(Nets.Net):
             self._phaseTest     = tf.assign(self._ifTest, True)
             
             # Inputs
-            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
+            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages,
                                                   name='CIFAR100_images')
-            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class20')
-            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class100')
             
             # Net
@@ -469,15 +469,15 @@ class NetCIFAR100(Nets.Net):
         net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
         
-        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0),
+                                        activation=Layers.Linear,
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class20)
-        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Fine', dtype=tf.float32)
+        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4,
+                                         biasInit=Layers.ConstInit(0.0),
+                                         activation=Layers.Linear,
+                                         name='FC_Fine', dtype=tf.float32)
         self._layers.append(class100)
         
         return class20.output, class100.output 
@@ -507,9 +507,9 @@ class NetCIFAR100(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-                                                  global_step=self._step, \
-                                                  decay_steps=self._HParam['DecayAfter']*12, \
+            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'],
+                                                  global_step=self._step,
+                                                  decay_steps=self._HParam['DecayAfter']*12,
                                                   decay_rate=0.1) + self._HParam['MinLearningRate']
             self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
             # Initialize all
@@ -529,15 +529,15 @@ class NetCIFAR100(Nets.Net):
                 data, label20, label100 = next(genTrain)
                 
                 loss20, loss100, loss, accu20, accu100, step, _ = \
-                    self._sess.run([self._lossClass20, self._lossClass100, self._loss, \
-                                    self._accuracyClass20, self._accuracyClass100, self._step, self._optimizer], \
-                                   feed_dict={self._images: data, \
-                                              self._labelsClass20: label20, \
+                    self._sess.run([self._lossClass20, self._lossClass100, self._loss,
+                                    self._accuracyClass20, self._accuracyClass100, self._step, self._optimizer],
+                                   feed_dict={self._images: data,
+                                              self._labelsClass20: label20,
                                               self._labelsClass100: label100})
                 self._sess.run(self._updateOps)
-                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100, \
-                      '; L: %.3f'% loss, \
-                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100, \
+                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100,
+                      '; L: %.3f'% loss,
+                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100,
                       end='')
                 
                 if step % self._HParam['ValidateAfter'] == 0: 
@@ -559,10 +559,10 @@ class NetCIFAR100(Nets.Net):
         for _ in range(self._HParam['TestSteps']): 
             data, label20, label100 = next(genTest)
             loss20, loss100, loss, accu20, accu100 = \
-                self._sess.run([self._lossClass20, self._lossClass100, self._loss, \
-                                self._accuracyClass20, self._accuracyClass100], \
-                               feed_dict={self._images: data, \
-                                          self._labelsClass20: label20, \
+                self._sess.run([self._lossClass20, self._lossClass100, self._loss,
+                                self._accuracyClass20, self._accuracyClass100],
+                               feed_dict={self._images: data,
+                                          self._labelsClass20: label20,
                                           self._labelsClass100: label100})
             totalLoss20       += loss20
             totalLoss100      += loss100
@@ -574,8 +574,8 @@ class NetCIFAR100(Nets.Net):
         totalLoss         /= self._HParam['TestSteps']
         totalAccu20       /= self._HParam['TestSteps']
         totalAccu100      /= self._HParam['TestSteps']
-        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100, \
-              '; Loss: ', totalLoss, \
+        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100,
+              '; Loss: ', totalLoss,
               '; Accu20: ', totalAccu20, '; Accu100: ', totalAccu100, )
         
     def infer(self, images):
@@ -597,9 +597,9 @@ class NetCIFAR100(Nets.Net):
         label100 = []
         for _ in range(100): 
             tmpdata, tmplabel20, tmplabel100 = next(genTest)
-            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata, \
-                                                               self._labelsClass20: tmplabel20, \
-                                                               self._labelsClass100: tmplabel100})
+            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata,
+                                                                 self._labelsClass20: tmplabel20,
+                                                                 self._labelsClass100: tmplabel100})
             data.append(tmpdata)
             label20.append(tmplabel20)
             label100.append(tmplabel100)

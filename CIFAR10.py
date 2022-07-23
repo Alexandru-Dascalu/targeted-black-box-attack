@@ -521,10 +521,10 @@ class NetCIFAR10(Nets.Net):
             self._phaseTest     = tf.assign(self._ifTest, True)
             
             # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
-                                                  name='CIFAR10_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[None], \
-                                                  name='CIFAR10_labels_class')
+            self._images = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages,
+                                          name='CIFAR10_images')
+            self._labels = tf.placeholder(dtype=tf.int64, shape=[None],
+                                          name='CIFAR10_labels_class')
             
             # Net
             self._body      = self.body(self._images)
@@ -563,10 +563,10 @@ class NetCIFAR10(Nets.Net):
         #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
         #net = Nets.SimpleV7(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
         
-        class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0),
+                                        activation=Layers.Linear,
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class10)
         
         return class10.output
@@ -581,9 +581,9 @@ class NetCIFAR10(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-                                                  global_step=self._step, \
-                                                  decay_steps=self._HParam['DecayAfter']*20, \
+            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'],
+                                                  global_step=self._step,
+                                                  decay_steps=self._HParam['DecayAfter']*20,
                                                   decay_rate=0.10) + self._HParam['MinLearningRate']
             #self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
             #self._lrDec = tf.assign(self._lr, self._lr*0.1)
@@ -611,14 +611,14 @@ class NetCIFAR10(Nets.Net):
                 data, label = next(genTrain)
                 
                 loss, accu, step, _ = \
-                    self._sess.run([self._loss, \
-                                    self._accuracy, self._step, self._optimizer], \
-                                   feed_dict={self._images: data, \
+                    self._sess.run([self._loss,
+                                    self._accuracy, self._step, self._optimizer],
+                                   feed_dict={self._images: data,
                                               self._labels: label})
                 self._sess.run(self._updateOps)
-                print('\rStep: ', step, \
-                      '; L: %.3f'% loss, \
-                      '; A: %.3f'% accu, \
+                print('\rStep: ', step,
+                      '; L: %.3f'% loss,
+                      '; A: %.3f'% accu,
                       end='')
                 
                 if step % self._HParam['ValidateAfter'] == 0: 
@@ -637,15 +637,15 @@ class NetCIFAR10(Nets.Net):
         for _ in range(self._HParam['TestSteps']): 
             data, label = next(genTest)
             loss, accu = \
-                self._sess.run([self._loss, \
-                                self._accuracy], \
-                               feed_dict={self._images: data, \
+                self._sess.run([self._loss,
+                                self._accuracy],
+                               feed_dict={self._images: data,
                                           self._labels: label})
             totalLoss += loss
             totalAccu += accu
         totalLoss /= self._HParam['TestSteps']
         totalAccu /= self._HParam['TestSteps']
-        print('\nTest: Loss: ', totalLoss, \
+        print('\nTest: Loss: ', totalLoss,
               '; Accu: ', totalAccu)
         
         return totalAccu

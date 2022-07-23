@@ -165,71 +165,71 @@ def _testShowData():
     print(batchLabelsFine.shape)
     plt.subplot(6, 6, 1)
     plt.imshow(batchData[0])
-    print('Index: ', 0, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[0]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[0]])
+    print('Index: ', 0, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[0]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[0]])
     plt.subplot(6, 6, 2)
     plt.imshow(batchData[1])
-    print('Index: ', 1, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[1]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[1]])
+    print('Index: ', 1, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[1]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[1]])
     plt.subplot(6, 6, 3)
     plt.imshow(batchData[2])
-    print('Index: ', 2, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[2]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[2]])
+    print('Index: ', 2, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[2]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[2]])
     plt.subplot(6, 6, 4)
     plt.imshow(batchData[3])
-    print('Index: ', 3, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[3]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[3]])
+    print('Index: ', 3, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[3]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[3]])
     plt.subplot(6, 6, 5)
     plt.imshow(batchData[4])
-    print('Index: ', 4, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[4]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[4]])
+    print('Index: ', 4, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[4]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[4]])
     plt.subplot(6, 6, 6)
     plt.imshow(batchData[5])
-    print('Index: ', 5, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[5]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[5]])
+    print('Index: ', 5, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[5]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[5]])
     batchData, batchLabelsCoarse, batchLabelsFine = next(batchTrain)
     plt.subplot(6, 6, 7)
     plt.imshow(batchData[0])
-    print('Index: ', 6, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[7]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[7]])
+    print('Index: ', 6, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[7]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[7]])
     plt.subplot(6, 6, 8)
     plt.imshow(batchData[8])
-    print('Index: ', 7, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[8]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[8]])
+    print('Index: ', 7, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[8]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[8]])
     plt.subplot(6, 6, 9)
     plt.imshow(batchData[9])
-    print('Index: ', 8, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[9]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[9]])
+    print('Index: ', 8, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[9]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[9]])
     plt.subplot(6, 6, 10)
     plt.imshow(batchData[10])
-    print('Index: ', 9, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[10]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[10]])
+    print('Index: ', 9, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[10]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[10]])
     plt.subplot(6, 6, 11)
     plt.imshow(batchData[11])
-    print('Index: ', 10, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[11]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[11]])
+    print('Index: ', 10, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[11]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[11]])
     plt.subplot(6, 6, 12)
     plt.imshow(batchData[12])
-    print('Index: ', 11, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[12]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[12]])
+    print('Index: ', 11, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[12]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[12]])
     plt.subplot(6, 6, 13)
     plt.imshow(batchData[13])
-    print('Index: ', 12, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[13]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[13]])
+    print('Index: ', 12, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[13]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[13]])
     plt.subplot(6, 6, 14)
     plt.imshow(batchData[14])
-    print('Index: ', 13, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[14]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[14]])
+    print('Index: ', 13, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[14]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[14]])
     plt.subplot(6, 6, 15)
     plt.imshow(batchData[0])
-    print('Index: ', 14, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[0]], \
-              ', ', CIFAR100.labelsFine[batchLabelsFine[0]])
+    print('Index: ', 14, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[0]],
+          ', ', CIFAR100.labelsFine[batchLabelsFine[0]])
     for idx in range(15, 36):
         batchData, batchLabelsCoarse, batchLabelsFine = next(batchTest)
         plt.subplot(6, 6, idx+1)
         plt.imshow(batchData[idx])
-        print('Index: ', idx, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[idx]], \
-                  ', ', CIFAR100.labelsFine[batchLabelsFine[idx]])
+        print('Index: ', idx, ' Type: ', CIFAR100.labelsCoarse[batchLabelsCoarse[idx]],
+              ', ', CIFAR100.labelsFine[batchLabelsFine[idx]])
     
     
     plt.show()

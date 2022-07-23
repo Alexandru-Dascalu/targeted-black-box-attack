@@ -30,11 +30,11 @@ class NetCIFAR100(Nets.Net):
             self._phaseTest     = tf.assign(self._ifTest, True)
             
             # Inputs
-            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
+            self._images         = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages,
                                                   name='CIFAR100_images')
-            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass20  = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class20')
-            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labelsClass100 = tf.placeholder(dtype=tf.int64, shape=[None],
                                                   name='CIFAR100_labels_class100')
             
             # Net
@@ -75,15 +75,15 @@ class NetCIFAR100(Nets.Net):
         net = Nets.SimpleV1(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
         
-        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0),
+                                        activation=Layers.Linear,
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class20)
-        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Fine', dtype=tf.float32)
+        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4,
+                                         biasInit=Layers.ConstInit(0.0),
+                                         activation=Layers.Linear,
+                                         name='FC_Fine', dtype=tf.float32)
         self._layers.append(class100)
         
         return class20.output, class100.output 
@@ -113,9 +113,9 @@ class NetCIFAR100(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-                                                  global_step=self._step, \
-                                                  decay_steps=self._HParam['DecayAfter'], \
+            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'],
+                                                  global_step=self._step,
+                                                  decay_steps=self._HParam['DecayAfter'],
                                                   decay_rate=0.95) + self._HParam['MinLearningRate']
             self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
             # Initialize all
@@ -135,15 +135,15 @@ class NetCIFAR100(Nets.Net):
                 data, label20, label100 = next(genTrain)
                 
                 loss20, loss100, loss, accu20, accu100, step, _ = \
-                    self._sess.run([self._lossClass20, self._lossClass100, self._loss, \
-                                    self._accuracyClass20, self._accuracyClass100, self._step, self._optimizer], \
-                                   feed_dict={self._images: data, \
-                                              self._labelsClass20: label20, \
+                    self._sess.run([self._lossClass20, self._lossClass100, self._loss,
+                                    self._accuracyClass20, self._accuracyClass100, self._step, self._optimizer],
+                                   feed_dict={self._images: data,
+                                              self._labelsClass20: label20,
                                               self._labelsClass100: label100})
                 self._sess.run(self._updateOps)
-                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100, \
-                      '; L: %.3f'% loss, \
-                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100, \
+                print('\rStep: ', step, '; L20: %.3f'% loss20, '; L100: %.3f'% loss100,
+                      '; L: %.3f'% loss,
+                      '; A20: %.3f'% accu20, '; A100: %.3f'% accu100,
                       end='')
                 
                 if step % self._HParam['ValidateAfter'] == 0: 
@@ -165,10 +165,10 @@ class NetCIFAR100(Nets.Net):
         for _ in range(self._HParam['TestSteps']): 
             data, label20, label100 = next(genTest)
             loss20, loss100, loss, accu20, accu100 = \
-                self._sess.run([self._lossClass20, self._lossClass100, self._loss, \
-                                self._accuracyClass20, self._accuracyClass100], \
-                               feed_dict={self._images: data, \
-                                          self._labelsClass20: label20, \
+                self._sess.run([self._lossClass20, self._lossClass100, self._loss,
+                                self._accuracyClass20, self._accuracyClass100],
+                               feed_dict={self._images: data,
+                                          self._labelsClass20: label20,
                                           self._labelsClass100: label100})
             totalLoss20       += loss20
             totalLoss100      += loss100
@@ -180,8 +180,8 @@ class NetCIFAR100(Nets.Net):
         totalLoss         /= self._HParam['TestSteps']
         totalAccu20       /= self._HParam['TestSteps']
         totalAccu100      /= self._HParam['TestSteps']
-        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100, \
-              '; Loss: ', totalLoss, \
+        print('\nTest: Loss20: ', totalLoss20, '; Loss100: ', totalLoss100,
+              '; Loss: ', totalLoss,
               '; Accu20: ', totalAccu20, '; Accu100: ', totalAccu100, )
         
     def save(self, path):
@@ -197,9 +197,9 @@ class NetCIFAR100(Nets.Net):
         label100 = []
         for _ in range(100): 
             tmpdata, tmplabel20, tmplabel100 = next(genTest)
-            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata, \
-                                                               self._labelsClass20: tmplabel20, \
-                                                               self._labelsClass100: tmplabel100})
+            tmpdata = self._sess.run(self._embedding, feed_dict={self._images: tmpdata,
+                                                                 self._labelsClass20: tmplabel20,
+                                                                 self._labelsClass100: tmplabel100})
             data.append(tmpdata)
             label20.append(tmplabel20)
             label100.append(tmplabel100)
