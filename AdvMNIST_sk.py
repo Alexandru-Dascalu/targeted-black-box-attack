@@ -703,7 +703,7 @@ if __name__ == '__main__':
     results = enemy.predict(dataTest)
     print('Accuracy: ', np.sum(np.array(results)==labelsTest)/labelsTest.shape[0])
     net = NetCIFAR10([28, 28, 1], enemy=enemy, numMiddle=2) 
-    batchTrain, batchTest = MNIST.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[28, 28, 1])
+    batchTrain, batchTest = MNIST.generatorsAdv(batch_size=HParamCIFAR10['BatchSize'], preproc_size=[28, 28, 1])
     net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netcifar10.ckpt')
     #net.train(batchTrain, batchTest, pathLoad='./AttackMNIST/netcifar10.ckpt-5400', pathSave='./AttackMNIST/netcifar10.ckpt')
     while True: 

@@ -15,7 +15,7 @@ def indicesInverted(data, labelsCoarse, labelsFine):
     
     return indicesCoarse, indicesFine
 
-def genIndex(size, shuffle=True): 
+def generate_index(size, shuffle=True):
     perm = list(range(size))
     if shuffle:
         random.shuffle(perm)

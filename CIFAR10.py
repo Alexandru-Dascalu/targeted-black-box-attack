@@ -88,7 +88,7 @@ def generators(BatchSize, preprocSize=[28, 28, 3]):
     (dataTrain, labelsTrain,  dataTest, labelsTest) = loadHDF5()
         
     def genTrainDatum():
-        index = Preproc.genIndex(dataTrain.shape[0], shuffle=True)
+        index = Preproc.generate_index(dataTrain.shape[0], shuffle=True)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTrain[indexAnchor]
@@ -99,7 +99,7 @@ def generators(BatchSize, preprocSize=[28, 28, 3]):
             yield images, labels
         
     def genTestDatum():
-        index = Preproc.genIndex(dataTest.shape[0], shuffle=False)
+        index = Preproc.generate_index(dataTest.shape[0], shuffle=False)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTest[indexAnchor]
@@ -171,7 +171,7 @@ def generatorsAdv(BatchSize, preprocSize=[28, 28, 3]):
     (dataTrain, labelsTrain,  dataTest, labelsTest) = loadHDF5()
         
     def genTrainDatum():
-        index = Preproc.genIndex(dataTrain.shape[0], shuffle=True)
+        index = Preproc.generate_index(dataTrain.shape[0], shuffle=True)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTrain[indexAnchor]
@@ -182,7 +182,7 @@ def generatorsAdv(BatchSize, preprocSize=[28, 28, 3]):
             yield images, labels
         
     def genTestDatum():
-        index = Preproc.genIndex(dataTest.shape[0], shuffle=False)
+        index = Preproc.generate_index(dataTest.shape[0], shuffle=False)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTest[indexAnchor]
@@ -290,7 +290,7 @@ def generatorsAdv2(BatchSize, preprocSize=[32, 32, 3]):
     print(labelsTest.shape)
             
     def genTrainDatum():
-        index = Preproc.genIndex(dataTrain.shape[0], shuffle=True)
+        index = Preproc.generate_index(dataTrain.shape[0], shuffle=True)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTrain[indexAnchor]
@@ -301,7 +301,7 @@ def generatorsAdv2(BatchSize, preprocSize=[32, 32, 3]):
             yield images, labels
         
     def genTestDatum():
-        index = Preproc.genIndex(dataTest.shape[0], shuffle=False)
+        index = Preproc.generate_index(dataTest.shape[0], shuffle=False)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTest[indexAnchor]
@@ -409,7 +409,7 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
     print(labelsTest.shape)
             
     def genTrainDatum():
-        index = Preproc.genIndex(dataTrain.shape[0], shuffle=True)
+        index = Preproc.generate_index(dataTrain.shape[0], shuffle=True)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTrain[indexAnchor]
@@ -420,7 +420,7 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
             yield images, labels
         
     def genTestDatum():
-        index = Preproc.genIndex(dataTest.shape[0], shuffle=False)
+        index = Preproc.generate_index(dataTest.shape[0], shuffle=False)
         while True:
             indexAnchor = next(index)
             imageAnchor = dataTest[indexAnchor]

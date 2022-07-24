@@ -22,7 +22,7 @@ def generators(BatchSize, preprocSize=[32, 32, 3], numSame=1, numDiff=1):
         Preproc.indicesInverted(dataTest, labelsCoarseTest, labelsFineTest)
         
     def genTrainDatum():
-        index = Preproc.genIndex(dataTrain.shape[0], shuffle=True)
+        index = Preproc.generate_index(dataTrain.shape[0], shuffle=True)
         while True:
             indexAnchor       = next(index)
             imageAnchor       = dataTrain[indexAnchor]
@@ -62,7 +62,7 @@ def generators(BatchSize, preprocSize=[32, 32, 3], numSame=1, numDiff=1):
             yield images, labelsCoarse, labelsFine
         
     def genTestDatum():
-        index = Preproc.genIndex(dataTest.shape[0], shuffle=False)
+        index = Preproc.generate_index(dataTest.shape[0], shuffle=False)
         while True:
             indexAnchor       = next(index)
             imageAnchor       = dataTest[indexAnchor]
