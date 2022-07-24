@@ -725,7 +725,7 @@ if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
     net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2)
-    batchTrain, batchTest = MNIST.generatorsAdv(batch_size=HParamMNIST['BatchSize'], preproc_size=[28, 28, 1])
+    batchTrain, batchTest = MNIST.get_adversarial_data_generators(batch_size=HParamMNIST['BatchSize'], preproc_size=[28, 28, 1])
     net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netmnist.ckpt')  # 90 and 94, 87 and 89
     # while True: 
     #     net.sample(batchTest, './AttackMNIST/netmnist.ckpt-4800')
