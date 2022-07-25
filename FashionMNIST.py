@@ -296,8 +296,8 @@ class NetMNIST(Nets.Net):
                     for tmp in elem.losses: 
                         self._loss += tmp
             for elem in self._layers: 
-                if len(elem.updateOps) > 0: 
-                    for tmp in elem.updateOps: 
+                if len(elem.update_ops) > 0:
+                    for tmp in elem.update_ops:
                         self._updateOps.append(tmp)
             print(self.summary)
             print("\n Begin Training: \n")

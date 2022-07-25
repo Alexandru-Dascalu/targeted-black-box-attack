@@ -486,8 +486,8 @@ class NetCIFAR10(Nets.Net):
                     for tmp in elem.losses: 
                         self._loss += tmp
             for elem in self._layers: 
-                if len(elem.updateOps) > 0: 
-                    for tmp in elem.updateOps: 
+                if len(elem.update_ops) > 0:
+                    for tmp in elem.update_ops:
                         self._updateOps.append(tmp)
             self._lossPredictor = self.lossClassify(self._predictor, self._labels, name='lossP') + self._loss
             self._lossGenerator = self.lossClassify(self._predictorG, self._targets, name='lossG') + self._HParam['NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss

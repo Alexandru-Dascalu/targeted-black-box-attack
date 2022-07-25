@@ -12,21 +12,21 @@ def ConstInit(const, dtype=tf.float32):
     return tf.constant_initializer(const, dtype=dtype)
 
 # Activations
-Linear  = tf.identity
+Linear = tf.identity
 Sigmoid = tf.nn.sigmoid
-Tanh    = tf.nn.tanh
-ReLU    = tf.nn.relu
-ELU     = tf.nn.elu
+Tanh = tf.nn.tanh
+ReLU = tf.nn.relu
+ELU = tf.nn.elu
 Softmax = tf.nn.softmax
+
+
 def LeakyReLU(alpha=0.2):
     return functools.partial(tf.nn.leaky_relu, alpha=alpha)
 
-#Poolings
-AvgPool        = tf.nn.avg_pool
-MaxPool        = tf.nn.max_pool
+# Poolings
+AvgPool = tf.nn.avg_pool
+MaxPool = tf.nn.max_pool
 
-class UnsupportedParam:
-    pass
 
 class Layer(object):
 
@@ -49,7 +49,7 @@ class Layer(object):
         return self._variables
 
     @property
-    def updateOps(self):
+    def update_ops(self):
         return self._updateOps
 
     @property
@@ -629,6 +629,7 @@ class FullyConnected(Layer):
                 'Weight Size: ' + str(self._weights.shape) + '; ' +
                 'Bias Size: ' + str(self._bias.shape) + '; ' +
                 'Activation: ' + activation + ']')
+
 
 class Activation(Layer):
 

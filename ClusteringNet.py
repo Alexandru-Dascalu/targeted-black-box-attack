@@ -53,8 +53,8 @@ class NetCIFAR100(Nets.Net):
                     for tmp in elem.losses: 
                         self._loss += tmp
             for elem in self._layers: 
-                if len(elem.updateOps) > 0: 
-                    for tmp in elem.updateOps: 
+                if len(elem.update_ops) > 0:
+                    for tmp in elem.update_ops:
                         self._updateOps.append(tmp)
             self._lossTrashClass20  = self.lossClassify(self._trashClass20, self._labelsClass20)
             self._lossTrashClass100 = self.lossClassify(self._trashClass100, self._labelsClass100)
