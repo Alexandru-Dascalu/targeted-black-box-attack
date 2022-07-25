@@ -211,19 +211,22 @@ class NetMNIST(Nets.Net):
             # number of times the output is correct
             self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
 
-            # why reset the loss to 0?
             self._loss = self.loss(self._body, self._labels)
+            # why reset the loss to 0 after defining it as a Tensor?
             self._loss = 0
+            # add losses of all layers to NN loss tensor
             for elem in self._layers:
                 if len(elem.losses) > 0:
                     for tmp in elem.losses:
                         self._loss += tmp
 
+            # add update operations from all layers to the list of update ops of the Net.
             self._updateOps = []
             for elem in self._layers:
-                if len(elem.updateOps) > 0:
-                    for tmp in elem.updateOps:
+                if len(elem.update_ops) > 0:
+                    for tmp in elem.update_ops:
                         self._updateOps.append(tmp)
+
             print(self.summary)
             print("\n Begin Training: \n")
 
