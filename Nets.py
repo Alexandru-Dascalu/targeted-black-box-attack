@@ -1,9 +1,43 @@
 import tensorflow as tf
 import Layers
 
-from Protocols import *
-
 wd = 4e-5
+
+
+class Net:
+
+    def __init__(self):
+        self._layers = []
+        self._variables = []
+        self._body = None
+        self._inference = None
+        self._loss = None
+        self._updataOp = None
+
+    def body(self, images):
+        pass
+
+    def inference(self):
+        pass
+
+    def loss(self):
+        pass
+
+    def train(self):
+        pass
+
+    def evaluate(self):
+        pass
+
+    @property
+    def summary(self):
+        summs = []
+        summs.append("=>Network Summary: ")
+        for elem in self._layers:
+            summs.append(elem.summary)
+        summs.append("<=Network Summary: ")
+        return "\n\n".join(summs)
+
 
 def LogisticRegression(standardized, step, ifTest, layers): 
     net = Layers.Flatten(standardized)
@@ -11,7 +45,8 @@ def LogisticRegression(standardized, step, ifTest, layers):
     
     return net
 
-def VanillaNN(standardized, step, ifTest, layers): 
+
+def vanilla_deep_fnn(standardized, layers):
     net = Layers.Flatten(standardized)
     layers.append(net)
     net = Layers.FullyConnected(net.output, outputSize=256, weightInit=Layers.XavierInit, wd=1e-4,
@@ -21,6 +56,7 @@ def VanillaNN(standardized, step, ifTest, layers):
     layers.append(net)
     
     return net
+
 
 def MNIST1(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=16,
@@ -57,6 +93,7 @@ def MNIST1(standardized, step, ifTest, layers):
     layers.append(net)
     
     return net
+
 
 def SimpleV1(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=64,
@@ -141,6 +178,7 @@ def SimpleV1(standardized, step, ifTest, layers):
     
     return net
 
+
 def SimpleV1C(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=64,
                         convKernel=[3, 3], convStride=[1, 1], convWD=wd,
@@ -221,6 +259,7 @@ def SimpleV1C(standardized, step, ifTest, layers):
     
     return net
 
+
 def SimpleV1CC(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=16,
                         convKernel=[3, 3], convStride=[1, 1], convWD=wd,
@@ -300,6 +339,7 @@ def SimpleV1CC(standardized, step, ifTest, layers):
     layers.append(net)
     
     return net
+
 
 def SimpleV2(standardized, step, ifTest, layers): 
     
@@ -545,6 +585,7 @@ def SimpleV2(standardized, step, ifTest, layers):
 
     return net
 
+
 def SimpleV3(standardized, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
@@ -677,6 +718,7 @@ def SimpleV3(standardized, step, ifTest, layers):
     net = Layers.GlobalAvgPool(net.output, name='GlobalAvgPool')
     layers.append(net)
     return net
+
 
 def SimpleV4(standardized, step, ifTest, layers):
     '''A bad version'''
@@ -833,6 +875,7 @@ def SimpleV4(standardized, step, ifTest, layers):
     layers.append(net)
     return net
 
+
 def SimpleV5(standardized, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
@@ -960,6 +1003,7 @@ def SimpleV5(standardized, step, ifTest, layers):
     net = Layers.GlobalAvgPool(net.output, name='GlobalAvgPool')
     layers.append(net)
     return net
+
 
 def SimpleV6(standardized, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
@@ -1094,6 +1138,7 @@ def SimpleV6(standardized, step, ifTest, layers):
     net = Layers.GlobalAvgPool(net.output, name='GlobalAvgPool')
     layers.append(net)
     return net
+
 
 def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
@@ -2490,6 +2535,7 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     
     return net
 
+
 def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*8,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
@@ -2744,6 +2790,7 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     
     return net
 
+
 def Xcpetion(standardized, step, ifTest, layers, numMiddle=8): 
     
     net = Layers.Conv2D(standardized, convChannels=32,
@@ -2927,6 +2974,7 @@ def Xcpetion(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     return net
+
 
 def XcpetionM(standardized, step, ifTest, layers, numMiddle=8): 
     '''Xception M is better than Xcpetion'''
@@ -3118,6 +3166,7 @@ def XcpetionM(standardized, step, ifTest, layers, numMiddle=8):
     
     return net
 
+
 def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8): 
     '''Xception M2 is worse than Xcpetion'''
     net = Layers.Conv2D(standardized, convChannels=32,
@@ -3301,7 +3350,8 @@ def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     return net
-  
+
+
 def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8): 
     
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
@@ -3485,7 +3535,8 @@ def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     return net
-  
+
+
 def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2): 
     
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
@@ -3675,7 +3726,8 @@ def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     return net
-  
+
+
 def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8): 
     
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
@@ -3868,6 +3920,7 @@ def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     return net
+
 
 def ResNet(standardized, step, ifTest, layers): 
     
