@@ -31,10 +31,10 @@ class UnsupportedParam:
 class Layer(object):
 
     def __init__(self):
-        self._output    = None
+        self._output = None
         self._variables = []
         self._updateOps = []
-        self._losses    = []
+        self._losses = []
 
     @property
     def type(self):
@@ -702,13 +702,13 @@ class GlobalAvgPool(Layer):
         return (self.type + ': [Name: ' + self._name + '; ' + 'Output Size: ' + str(self._output.shape) + '; ' +
                 'Type: Global Average Pooling' + ']')
 
+
 class CrossEntropy(Layer):
 
-    def __init__(self, feature, labels,
-                 reuse=False, name=None):
+    def __init__(self, feature, labels, reuse=False, name=None):
         assert isinstance(feature, tf.Tensor), 'feature must be a tf.Tensor, use Layer.output to get it'
 
-        Layer.__init__(self);
+        Layer.__init__(self)
         self._name = name
         with tf.variable_scope(self._name, reuse=reuse) as scope:
             self._output = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=feature,

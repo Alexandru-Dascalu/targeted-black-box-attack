@@ -15,15 +15,55 @@ class Net:
         self._updataOp = None
 
     def body(self, images):
+        """
+        Defines the body of the NN and adds all layers to the layers list of the NN.
+        Parameters
+        ----------
+        images : Tensor
+            Tensor representing the minibatch of images that the NN works on.
+
+        Returns
+        ----------
+        outputs
+            Output of NN as a Tensor. Is it always logits?
+        """
         pass
 
-    def inference(self):
+    def inference(self, logits):
+        """
+        Computes hard label prediction (label is one categrical value, not a vector of probabilities for each class.)
+        Parameters
+        ----------
+        logits : Tensor
+            Tensor representing the output of the NN with one minibatch as input.
+
+        Returns
+        ----------
+        predictions
+            A tensor with the label prediction for every sample in the minibatch.
+        """
         pass
 
-    def loss(self):
+    def loss(self, logits, labels, name):
+        """
+        Computes loss function of the NN.
+        Parameters
+        ----------
+        logits : Tensor
+            Tensor representing the output of the NN with one minibatch as input.
+        labels : Tensor
+            Tensor representing labels of each sample in minibatch. Are they always soft or hard labels?
+        name : string
+            Name of loss function.
+
+        Returns
+        ----------
+        predictions
+            A tensor with the label prediction for every sample in the minibatch.
+        """
         pass
 
-    def train(self):
+    def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         pass
 
     def evaluate(self):

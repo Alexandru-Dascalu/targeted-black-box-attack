@@ -94,7 +94,7 @@ def get_data_generators(batch_size, preproc_size=None):
 
 def get_adversarial_data_generators(batch_size, preproc_size=None):
     """ Creates generators that generate batches of samples from the MNIST data set, with pre-processed specifically for
-    use when training the adversarial generator.
+    use when training the adversarial generator, and with a random adversarial target label.
     Parameters
     ----------
     batch_size : int
@@ -105,7 +105,8 @@ def get_adversarial_data_generators(batch_size, preproc_size=None):
     Returns
     ----------
     Two generators: the first is for generating training data set batches, and the second is for generating test set
-    batches.
+    batches. Each generator generates a tuple with three elements: a batch of images, a batch of their true labels, and
+    a batch of the desired target labels.
     """
     if preproc_size is None:
         preproc_size = [28, 28, 1]
@@ -157,22 +158,37 @@ def get_adversarial_data_generators(batch_size, preproc_size=None):
     return generate_batch(training=True), generate_batch(training=False)
 
 
-HParamMNIST = {'BatchSize': 200,
-               'LearningRate': 1e-3,
-               'MinLearningRate': 1e-5,
-               'DecayAfter': 300,
-               'ValidateAfter': 300,
-               'TestSteps': 50,
-               'TotalSteps': 40000}
-
-
 class NetMNIST(Nets.Net):
+    HParamMNIST = {'BatchSize': 200,
+                   'LearningRate': 1e-3,
+                   'MinLearningRate': 1e-5,
+                   'DecayAfter': 300,
+                   'ValidateAfter': 300,
+                   'TestSteps': 50,
+                   'TotalSteps': 40000}
 
-    def __init__(self, image_shape, HParam=HParamMNIST):
+    def __init__(self, image_shape, hyper_params=None):
+        """
+        Parameters
+        ----------
+        image_shape : list of ints
+            Shape of images the net is trained on
+        hyper_params : dictionary with string keys
+            Dictionary mapping hyper param names to the the hyperparam values.
+
+        Returns
+        ----------
+        Two generators: the first is for generating training data set batches, and the second is for generating test set
+        batches. Each generator generates a tuple with three elements: a batch of images, a batch of their true labels, and
+        a batch of the desired target labels.
+        """
         Nets.Net.__init__(self)
 
+        if hyper_params is None:
+            hyper_params = NetMNIST.HParamMNIST
+
         self._init = False
-        self._HParam = HParam
+        self._hyper_params = hyper_params
         self._graph = tf.Graph()
         self._sess = tf.Session(graph=self._graph)
 
@@ -184,21 +200,26 @@ class NetMNIST(Nets.Net):
 
             # Inputs
             self._images = tf.placeholder(dtype=tf.float32, shape=[None] + image_shape,
-                                          name='CIFAR10_images')
+                                          name='MNIST_images')
             self._labels = tf.placeholder(dtype=tf.int64, shape=[None],
-                                          name='CIFAR10_labels_class')
+                                          name='MNIST_labels_class')
 
             # Net
             self._body = self.body(self._images)
             self._inference = self.inference(self._body)
+            # defines accuracy metric. checks if inference output is equal to labels, and computes an average of the
+            # number of times the output is correct
             self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
-            self._loss = self.lossClassify(self._body, self._labels)
+
+            # why reset the loss to 0?
+            self._loss = self.loss(self._body, self._labels)
             self._loss = 0
-            self._updateOps = []
             for elem in self._layers:
                 if len(elem.losses) > 0:
                     for tmp in elem.losses:
                         self._loss += tmp
+
+            self._updateOps = []
             for elem in self._layers:
                 if len(elem.updateOps) > 0:
                     for tmp in elem.updateOps:
@@ -209,21 +230,23 @@ class NetMNIST(Nets.Net):
             # Saver
             self._saver = tf.train.Saver(max_to_keep=5)
 
-    def preproc(self, images):
-        # Preprocessings
+    @staticmethod
+    def normalise_images(images):
+        # normalise images with 0 to 255 values to -1 to 1
         casted = tf.cast(images, tf.float32)
         standardized = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
 
         return standardized
 
     def body(self, images):
-        # Preprocessings
-        standardized = self.preproc(images)
+        # normalise images to -1 to 1 values
+        standardized = self.normalise_images(images)
         # Body
-        net = Nets.VanillaNN(standardized, self._step, self._ifTest, self._layers)
-        # net = Nets.LogisticRegression(standardized, self._step, self._ifTest, self._layers)
+        # paper says they used SmallNet in the experiment, not this VanillaNN
+        net = Nets.vanilla_deep_fnn(standardized, self._layers)
         # net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
 
+        # add output layer with no activation
         class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4,
                                         biasInit=Layers.ConstInit(0.0),
                                         activation=Layers.Linear,
@@ -235,17 +258,17 @@ class NetMNIST(Nets.Net):
     def inference(self, logits):
         return tf.argmax(logits, axis=-1, name='inference')
 
-    def lossClassify(self, logits, labels, name='cross_entropy'):
+    def loss(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
         self._layers.append(net)
         return net.output
 
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'],
+            self._lr = tf.train.exponential_decay(self._hyper_params['LearningRate'],
                                                   global_step=self._step,
-                                                  decay_steps=self._HParam['DecayAfter'] * 10,
-                                                  decay_rate=0.30) + self._HParam['MinLearningRate']
+                                                  decay_steps=self._hyper_params['DecayAfter'] * 10,
+                                                  decay_rate=0.30) + self._hyper_params['MinLearningRate']
             self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss,
                                                                                       global_step=self._step)
             # Initialize all
@@ -260,7 +283,7 @@ class NetMNIST(Nets.Net):
             self._sess.run([self._phaseTrain])
             if path_save is not None:
                 self.save(path_save)
-            for _ in range(self._HParam['TotalSteps']):
+            for _ in range(self._hyper_params['TotalSteps']):
 
                 data, label = next(training_data_generator)
 
@@ -275,7 +298,7 @@ class NetMNIST(Nets.Net):
                       '; A: %.3f' % accu,
                       end='')
 
-                if step % self._HParam['ValidateAfter'] == 0:
+                if step % self._hyper_params['ValidateAfter'] == 0:
                     self.evaluate(test_data_generator)
                     if path_save is not None:
                         self.save(path_save)
@@ -288,7 +311,7 @@ class NetMNIST(Nets.Net):
         totalLoss = 0.0
         totalAccu = 0.0
         self._sess.run([self._phaseTest])
-        for _ in range(self._HParam['TestSteps']):
+        for _ in range(self._hyper_params['TestSteps']):
             data, label = next(test_data_generator)
             loss, accu = \
                 self._sess.run([self._loss,
@@ -297,8 +320,8 @@ class NetMNIST(Nets.Net):
                                           self._labels: label})
             totalLoss += loss
             totalAccu += accu
-        totalLoss /= self._HParam['TestSteps']
-        totalAccu /= self._HParam['TestSteps']
+        totalLoss /= self._hyper_params['TestSteps']
+        totalAccu /= self._hyper_params['TestSteps']
         print('\nTest: Loss: ', totalLoss,
               '; Accu: ', totalAccu)
 
@@ -317,6 +340,6 @@ class NetMNIST(Nets.Net):
 
 if __name__ == '__main__':
     net = NetMNIST([28, 28, 1])  # 8
-    batchTrain, batchTest = get_data_generators(batch_size=HParamMNIST['BatchSize'])
+    batchTrain, batchTest = get_data_generators(batch_size=NetMNIST.HParamMNIST['BatchSize'])
     net.train(batchTrain, batchTest, path_save='./ClassifyMNIST/netmnist.ckpt')
 # The best configuration is 64 features and 8 middle layers
