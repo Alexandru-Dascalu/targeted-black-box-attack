@@ -13,6 +13,8 @@ class Net:
         self._inference = None
         self._loss = None
         self._updataOp = None
+        self._saver = None
+        self._sess = None
 
     def body(self, images):
         """
@@ -68,6 +70,16 @@ class Net:
 
     def evaluate(self):
         pass
+
+    def load(self, path):
+        """
+        Restores model variables from a file at the given path.
+        Parameters
+        ----------
+        path : String
+            Path to file containing saved variables.
+        """
+        self._saver.restore(self._sess, path)
 
     @property
     def summary(self):

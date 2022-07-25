@@ -162,7 +162,8 @@ class NetMNIST(Nets.Net):
     HParamMNIST = {'BatchSize': 200,
                    'LearningRate': 1e-3,
                    'MinLearningRate': 1e-5,
-                   'DecayAfter': 300,
+                   'DecayAfter': 3000,
+                   'DecayRate': 0.30,
                    'ValidateAfter': 300,
                    'TestSteps': 50,
                    'TotalSteps': 40000}
@@ -268,39 +269,41 @@ class NetMNIST(Nets.Net):
 
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
-            self._lr = tf.train.exponential_decay(self._hyper_params['LearningRate'],
-                                                  global_step=self._step,
-                                                  decay_steps=self._hyper_params['DecayAfter'] * 10,
-                                                  decay_rate=0.30) + self._hyper_params['MinLearningRate']
-            self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss,
-                                                                                      global_step=self._step)
-            # Initialize all
-            self._sess.run(tf.global_variables_initializer())
+            # define decaying learning rate
+            self._learning_rate = tf.train.exponential_decay(self._hyper_params['LearningRate'],
+                                                             global_step=self._step,
+                                                             decay_steps=self._hyper_params['DecayAfter'],
+                                                             decay_rate=self._hyper_params['DecayRate'])
+            self._learning_rate += self._hyper_params['MinLearningRate']
 
+            # define optimiser
+            self._optimizer = tf.train.AdamOptimizer(self._learning_rate, epsilon=1e-8).minimize(self._loss,
+                                                                                                 global_step=self._step)
+            # Initialize all variables
+            self._sess.run(tf.global_variables_initializer())
             if path_load is not None:
                 self.load(path_load)
 
             self.evaluate(test_data_generator)
-            #             self.sample(genTest)
 
+            # what does this do?
             self._sess.run([self._phaseTrain])
             if path_save is not None:
                 self.save(path_save)
+
+            # main training loop
             for _ in range(self._hyper_params['TotalSteps']):
-
                 data, label = next(training_data_generator)
-
-                loss, accu, step, _ = \
-                    self._sess.run([self._loss,
-                                    self._accuracy, self._step, self._optimizer],
-                                   feed_dict={self._images: data,
-                                              self._labels: label})
+                # calculate loss and accuracy and perform one minimisation step
+                loss, accuracy, step, _ = self._sess.run([self._loss, self._accuracy, self._step, self._optimizer],
+                                                     feed_dict={self._images: data, self._labels: label})
+                # what does this do exactly?
                 self._sess.run(self._updateOps)
-                print('\rStep: ', step,
-                      '; L: %.3f' % loss,
-                      '; A: %.3f' % accu,
-                      end='')
 
+                # logging
+                print('\rStep: ', step, '; loss: %.3f' % loss, '; accuracy: %.3f' % accuracy, end='')
+
+                # evaluate on test set every so often
                 if step % self._hyper_params['ValidateAfter'] == 0:
                     self.evaluate(test_data_generator)
                     if path_save is not None:
