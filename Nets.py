@@ -19,6 +19,7 @@ class Net:
     def body(self, images):
         """
         Defines the body of the NN and adds all layers to the layers list of the NN.
+
         Parameters
         ----------
         images : Tensor
@@ -34,6 +35,7 @@ class Net:
     def inference(self, logits):
         """
         Computes hard label prediction (label is one categrical value, not a vector of probabilities for each class.)
+
         Parameters
         ----------
         logits : Tensor
@@ -49,6 +51,7 @@ class Net:
     def loss(self, logits, labels, name):
         """
         Computes loss function of the NN.
+
         Parameters
         ----------
         logits : Tensor
@@ -66,9 +69,38 @@ class Net:
         pass
 
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
+        """
+        Trains network according the the hyper params of the Net subclass.
+
+        Parameters
+        ----------
+        training_data_generator : generator
+            Generator which returns each step a tuple with two tensors: the first is the mini-batch of training images,
+            and the second is a list of their coresponding hard labels.
+        test_data_generator : generator
+            Generator which returns each step a tuple with two tensors: the first is the mini-batch of test images, and
+            the second is a list of their coresponding hard labels. Every so often, the model will be evaluated on test
+            data between training steps.
+        path_load : string
+            Path to checkpoint with weights of pre-trained model that we want to further train.
+        path_save : string
+            Path to where we want to save a checkpoint with the current weights of the model.
+        """
         pass
 
-    def evaluate(self):
+    def evaluate(self, test_data_generator, path=None):
+        """
+        Evaluates trained (or in training) model across several minibatches from the test set. The number of batches is
+        a hyper param of the Net subclass.
+
+        Parameters
+        ----------
+        test_data_generator : generator
+            Generator which returns each step a tuple with two tensors: the first is the mini-batch of test images, and
+            the second is a list of their coresponding hard labels.
+        path : string
+            Path to checkpoint with weights of pre-trained model that we want to evaluate
+        """
         pass
 
     def load(self, path):

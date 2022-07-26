@@ -194,10 +194,13 @@ class NetMNIST(Nets.Net):
         self._sess = tf.Session(graph=self._graph)
 
         with self._graph.as_default():
+            # variable to keep check if network is being tested or trained
             self._ifTest = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
-            self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
+            # define operations to set ifTest variable
             self._phaseTrain = tf.assign(self._ifTest, False)
             self._phaseTest = tf.assign(self._ifTest, True)
+
+            self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
 
             # Inputs
             self._images = tf.placeholder(dtype=tf.float32, shape=[None] + image_shape,
@@ -205,8 +208,9 @@ class NetMNIST(Nets.Net):
             self._labels = tf.placeholder(dtype=tf.int64, shape=[None],
                                           name='MNIST_labels_class')
 
-            # Net
+            # define network body
             self._body = self.body(self._images)
+            # define inference metric
             self._inference = self.inference(self._body)
             # defines accuracy metric. checks if inference output is equal to labels, and computes an average of the
             # number of times the output is correct
@@ -281,12 +285,13 @@ class NetMNIST(Nets.Net):
                                                                                                  global_step=self._step)
             # Initialize all variables
             self._sess.run(tf.global_variables_initializer())
+            # check if it should re-start training from a known checkpoint
             if path_load is not None:
                 self.load(path_load)
 
             self.evaluate(test_data_generator)
 
-            # what does this do?
+            # set testing flag to false
             self._sess.run([self._phaseTrain])
             if path_save is not None:
                 self.save(path_save)
@@ -296,7 +301,7 @@ class NetMNIST(Nets.Net):
                 data, label = next(training_data_generator)
                 # calculate loss and accuracy and perform one minimisation step
                 loss, accuracy, step, _ = self._sess.run([self._loss, self._accuracy, self._step, self._optimizer],
-                                                     feed_dict={self._images: data, self._labels: label})
+                                                         feed_dict={self._images: data, self._labels: label})
                 # what does this do exactly?
                 self._sess.run(self._updateOps)
 
@@ -306,30 +311,36 @@ class NetMNIST(Nets.Net):
                 # evaluate on test set every so often
                 if step % self._hyper_params['ValidateAfter'] == 0:
                     self.evaluate(test_data_generator)
+                    # save state of model at each evaluation step
                     if path_save is not None:
                         self.save(path_save)
+
+                    # set test flag back to False
                     self._sess.run([self._phaseTrain])
 
     def evaluate(self, test_data_generator, path=None):
         if path is not None:
             self.load(path)
 
-        totalLoss = 0.0
-        totalAccu = 0.0
+        # set testing flag to true
         self._sess.run([self._phaseTest])
+
+        sum_loss = 0.0
+        sum_accuracy = 0.0
+        # for each test step, measure loss and accuracy on test data, but do not train the weights!
         for _ in range(self._hyper_params['TestSteps']):
             data, label = next(test_data_generator)
-            loss, accu = \
-                self._sess.run([self._loss,
-                                self._accuracy],
-                               feed_dict={self._images: data,
-                                          self._labels: label})
-            totalLoss += loss
-            totalAccu += accu
-        totalLoss /= self._hyper_params['TestSteps']
-        totalAccu /= self._hyper_params['TestSteps']
-        print('\nTest: Loss: ', totalLoss,
-              '; Accu: ', totalAccu)
+            # evaluate loss and accuracy
+            loss, accu = self._sess.run([self._loss, self._accuracy],
+                                        feed_dict={self._images: data, self._labels: label})
+            sum_loss += loss
+            sum_accuracy += accu
+
+        # calculate average loss and accuracy across the mini-batches in all test iterations
+        avg_loss = sum_loss / self._hyper_params['TestSteps']
+        avg_accuracy = sum_accuracy / self._hyper_params['TestSteps']
+        print('\nTest: Loss: ', avg_loss,
+              '; Accu: ', avg_accuracy)
 
     def infer(self, images):
 
