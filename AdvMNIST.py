@@ -6,22 +6,15 @@ import matplotlib.pyplot as plt
 import Layers
 import Nets
 import MNIST
+import Preproc
 
 wd = 1e-4
 NoiseRange = 255.0
 
 
-def preproc(images):
-    # Preprocessings
-    casted = tf.cast(images, tf.float32)
-    standardized = tf.identity(casted / 127.5 - 1.0)
-
-    return standardized
-
-
 def Generator(images, targets, numSubnets, step, ifTest, layers):
     with tf.variable_scope('Encoder', reuse=tf.AUTO_REUSE) as scope:
-        net = Layers.Conv2D(preproc(images), convChannels=16, convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+        net = Layers.Conv2D(Preproc.normalise_images(images), convChannels=16, convKernel=[5, 5], convStride=[2, 2], convWD=wd,
                             convInit=Layers.XavierInit, convPadding='SAME', biasInit=Layers.ConstInit(0.0), bn=True,
                             step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU, name='Conv1', dtype=tf.float32)

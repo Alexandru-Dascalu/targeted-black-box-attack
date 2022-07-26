@@ -1,6 +1,15 @@
 import cv2
 import random
 import numpy as np
+import tensorflow as tf
+
+
+def normalise_images(images):
+    # normalise images with 0 to 255 values to -1 to 1
+    casted = tf.cast(images, tf.float32)
+    standardized = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
+
+    return standardized
 
 def indicesInverted(data, labelsCoarse, labelsFine): 
     assert isinstance(data, np.ndarray), 'data must be numpy.ndarray'

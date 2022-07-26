@@ -238,17 +238,9 @@ class NetMNIST(Nets.Net):
             # Saver
             self._saver = tf.train.Saver(max_to_keep=5)
 
-    @staticmethod
-    def normalise_images(images):
-        # normalise images with 0 to 255 values to -1 to 1
-        casted = tf.cast(images, tf.float32)
-        standardized = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
-
-        return standardized
-
     def body(self, images):
         # normalise images to -1 to 1 values
-        standardized = self.normalise_images(images)
+        standardized = Preproc.normalise_images(images)
         # Body
         # paper says they used SmallNet in the experiment, not this VanillaNN
         net = Nets.vanilla_deep_fnn(standardized, self._layers)
@@ -343,7 +335,6 @@ class NetMNIST(Nets.Net):
               '; Accu: ', avg_accuracy)
 
     def infer(self, images):
-
         self._sess.run([self._phaseTest])
 
         return self._sess.run(self._inference, feed_dict={self._images: images})
