@@ -144,26 +144,26 @@ def vanilla_deep_fnn(standardized, layers):
 
 def MNIST1(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=16,
-                        convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                        convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=32,
-                        convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                        convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv7b', dtype=tf.float32)
     layers.append(net)
@@ -181,64 +181,64 @@ def MNIST1(standardized, step, ifTest, layers):
 
 def SimpleV1(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[3, 3], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',
                         name='Conv2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv3', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv4', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv5', dtype=tf.float32)
     layers.append(net)
     added = toadd + net.output
     net = Layers.Conv2D(added, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[3, 3], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',
                         name='Conv6', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[3, 3], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',
@@ -265,70 +265,70 @@ def SimpleV1(standardized, step, ifTest, layers):
 
 def SimpleV1C(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv3', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv4a', dtype=tf.float32)
     layers.append(net)
     added = toadd + net.output
     net = Layers.Conv2D(added, convChannels=128,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv5', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv6a', dtype=tf.float32)
     layers.append(net)
     added = toadd + net.output
     net = Layers.Conv2D(added, convChannels=128,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv7a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv7b', dtype=tf.float32)
     layers.append(net)
@@ -346,70 +346,70 @@ def SimpleV1C(standardized, step, ifTest, layers):
 
 def SimpleV1CC(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=16,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=32,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv3', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv4a', dtype=tf.float32)
     layers.append(net)
     added = toadd + net.output
     net = Layers.Conv2D(added, convChannels=64,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv5', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv6a', dtype=tf.float32)
     layers.append(net)
     added = toadd + net.output
     net = Layers.Conv2D(added, convChannels=64,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv7a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv7b', dtype=tf.float32)
     layers.append(net)
@@ -428,43 +428,43 @@ def SimpleV1CC(standardized, step, ifTest, layers):
 def SimpleV2(standardized, step, ifTest, layers): 
     
     net = Layers.Conv2D(standardized, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv32_1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv32_2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_1', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_3', dtype=tf.float32)
     layers.append(net)
@@ -473,18 +473,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(toadd, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_4', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_5', dtype=tf.float32)
     layers.append(net)
@@ -493,18 +493,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(toadd, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_6', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64_7', dtype=tf.float32)
     layers.append(net)
@@ -512,28 +512,28 @@ def SimpleV2(standardized, step, ifTest, layers):
     added = toadd + net.output
     
     net = Layers.Conv2D(added, convChannels=128,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_1', dtype=tf.float32)
     layers.append(net)
     toadd = net.output
     
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_3', dtype=tf.float32)
     layers.append(net)
@@ -542,18 +542,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(toadd, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_4', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_5', dtype=tf.float32)
     layers.append(net)
@@ -562,18 +562,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(toadd, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_6', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128_7', dtype=tf.float32)
     layers.append(net)
@@ -581,10 +581,10 @@ def SimpleV2(standardized, step, ifTest, layers):
     added = toadd + net.output
     
     net = Layers.Conv2D(added, convChannels=256,
-                        convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                        convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_1', dtype=tf.float32)
     layers.append(net)
@@ -592,18 +592,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = net.output
     
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_2', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_3', dtype=tf.float32)
     layers.append(net)
@@ -612,18 +612,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(added, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_4', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_5', dtype=tf.float32)
     layers.append(net)
@@ -632,18 +632,18 @@ def SimpleV2(standardized, step, ifTest, layers):
     toadd = added
     
     net = Layers.Conv2D(added, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_6', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256_7', dtype=tf.float32)
     layers.append(net)
@@ -689,10 +689,10 @@ def SimpleV3(standardized, step, ifTest, layers):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=192,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -718,10 +718,10 @@ def SimpleV3(standardized, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=384,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -750,10 +750,10 @@ def SimpleV3(standardized, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -845,10 +845,10 @@ def SimpleV4(standardized, step, ifTest, layers):
     concated = tf.concat([branch1.output, branch2.output, branch3.output], axis=3, name='Concat')
     
     toadd = Layers.Conv2D(concated, convChannels=192,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -874,10 +874,10 @@ def SimpleV4(standardized, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=384,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -906,10 +906,10 @@ def SimpleV4(standardized, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -979,10 +979,10 @@ def SimpleV5(standardized, step, ifTest, layers):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=192,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1009,10 +1009,10 @@ def SimpleV5(standardized, step, ifTest, layers):
     added = tf.concat([toadd.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(added, convChannels=384,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1042,10 +1042,10 @@ def SimpleV5(standardized, step, ifTest, layers):
     added = tf.concat([toadd.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(added, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1097,10 +1097,10 @@ def SimpleV6(standardized, step, ifTest, layers):
                                  name='DepthwiseConv3x16', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='SepConv48', dtype=tf.float32)
     layers.append(net)
@@ -1114,10 +1114,10 @@ def SimpleV6(standardized, step, ifTest, layers):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=192,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1144,10 +1144,10 @@ def SimpleV6(standardized, step, ifTest, layers):
     added = tf.concat([toadd.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(added, convChannels=384,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1177,10 +1177,10 @@ def SimpleV6(standardized, step, ifTest, layers):
     added = tf.concat([toadd.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(added, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1233,19 +1233,19 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=48,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage1_Conv_48a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage1_Conv1x1_96', dtype=tf.float32)
     layers.append(net)
@@ -1258,10 +1258,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage1_DepthwiseConv96', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage1_Conv1x1_48b', dtype=tf.float32)
     layers.append(net)
@@ -1269,19 +1269,19 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=96,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage2_Conv_96a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage2_Conv1x1_192', dtype=tf.float32)
     layers.append(net)
@@ -1294,10 +1294,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage2_DepthwiseConv192', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage2_Conv1x1_96b', dtype=tf.float32)
     layers.append(net)
@@ -1305,10 +1305,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=192,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1316,10 +1316,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage3_Conv1x1_384', dtype=tf.float32)
     layers.append(net)
@@ -1332,10 +1332,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage3_DepthwiseConv384', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage3_Conv1x1_192b', dtype=tf.float32)
     layers.append(net)
@@ -1343,10 +1343,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=384,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1354,10 +1354,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage4_Conv1x1_768', dtype=tf.float32)
     layers.append(net)
@@ -1370,20 +1370,20 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage4_DepthwiseConv768', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage4_Conv1x1_384b', dtype=tf.float32)
     layers.append(net)
     
     concated = tf.concat([toconcat.output, net.output], axis=3)
     toadd = Layers.Conv2D(concated, convChannels=768,
-                          convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                          convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.Linear,
                           name='SepConv768Toadd', dtype=tf.float32)
     layers.append(toadd)
@@ -1420,10 +1420,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1536,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -1433,10 +1433,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=768,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1444,10 +1444,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=1536,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Exit_Conv1x1_1536', dtype=tf.float32)
     layers.append(net)
@@ -1460,10 +1460,10 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv1536', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_768b', dtype=tf.float32)
     layers.append(net)
@@ -1494,19 +1494,19 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=48,
-                             convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                             convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage1_Conv1x1_48a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage1_Conv1x1_96', dtype=tf.float32)
     layers.append(net)
@@ -1519,10 +1519,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage1_DepthwiseConv96', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage1_Conv1x1_48b', dtype=tf.float32)
     layers.append(net)
@@ -1530,10 +1530,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=96,
-                             convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                             convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1541,10 +1541,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage2_Conv1x1_192', dtype=tf.float32)
     layers.append(net)
@@ -1557,10 +1557,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage2_DepthwiseConv192', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage2_Conv1x1_96b', dtype=tf.float32)
     layers.append(net)
@@ -1568,10 +1568,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=192,
-                             convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                             convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -1579,10 +1579,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage3_Conv1x1_384', dtype=tf.float32)
     layers.append(net)
@@ -1595,10 +1595,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage3_DepthwiseConv384', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage3_Conv1x1_192b', dtype=tf.float32)
     layers.append(net)
@@ -1606,10 +1606,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(concated, convChannels=384,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.Linear,
                           name='SepConv384Toadd', dtype=tf.float32)
     layers.append(toadd)
@@ -1646,10 +1646,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -1670,10 +1670,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Exit_Conv1x1_768', dtype=tf.float32)
     layers.append(net)
@@ -1686,10 +1686,10 @@ def SimpleV8(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv768', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_384b', dtype=tf.float32)
     layers.append(net)
@@ -1730,10 +1730,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=24,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage1_Conv1x1_24_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1746,10 +1746,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage1_DepthwiseConv24_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=12,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage1_Conv1x1_12b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1768,10 +1768,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=48,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage2_Conv1x1_48_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1784,10 +1784,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage2_DepthwiseConv48_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=24,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage2_Conv1x1_24b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1808,10 +1808,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=96,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage3_Conv1x1_96_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1824,10 +1824,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage3_DepthwiseConv96_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=48,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage3_Conv1x1_48b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -1877,10 +1877,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1152,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -1901,10 +1901,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=1152,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Exit_Conv1x1_1152', dtype=tf.float32)
     layers.append(net)
@@ -1917,10 +1917,10 @@ def SimpleV9(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv1152', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=576,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_576b', dtype=tf.float32)
     layers.append(net)
@@ -2057,10 +2057,10 @@ def SimpleV10(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1152,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -2114,10 +2114,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=48,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage1_Conv1x1_48a', dtype=tf.float32)
     layers.append(toconcat)
@@ -2125,10 +2125,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=32,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage1_Conv1x1_32_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2141,10 +2141,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage1_DepthwiseConv32_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=16,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage1_Conv1x1_16b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2152,10 +2152,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
         concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(net.output, convChannels=96,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage2_Conv1x1_72a', dtype=tf.float32)
     layers.append(toconcat)
@@ -2163,10 +2163,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=64,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage2_Conv1x1_64_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2179,10 +2179,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage2_DepthwiseConv64_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=32,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage2_Conv1x1_32b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2190,10 +2190,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
         concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(net.output, convChannels=192,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              pool=True, poolSize=[3, 3], poolStride=[2, 2],
                              poolType=Layers.MaxPool, poolPadding='SAME',
@@ -2203,10 +2203,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=128,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage3_Conv1x1_128_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2219,10 +2219,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage3_DepthwiseConv128_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=64,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage3_Conv1x1_64b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2230,10 +2230,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
         concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(net.output, convChannels=384,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage4_Conv1x1_384a', dtype=tf.float32)
     layers.append(toconcat)
@@ -2241,10 +2241,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     
     for idx in range(3):
         net = Layers.Conv2D(concated, convChannels=256,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Stage4_Conv1x1_256_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2257,10 +2257,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
                                      name='Stage4_DepthwiseConv256_'+str(idx), dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=128,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.Linear,
                             name='Stage4_Conv1x1_128b_'+str(idx), dtype=tf.float32)
         layers.append(net)
@@ -2268,10 +2268,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
         concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toadd = Layers.Conv2D(concated, convChannels=768,
-                          convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                          convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -2310,10 +2310,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1536,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -2334,10 +2334,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=1536,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Exit_Conv1x1_1536', dtype=tf.float32)
     layers.append(net)
@@ -2350,10 +2350,10 @@ def SimpleV11(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv1536', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_768b', dtype=tf.float32)
     layers.append(net)
@@ -2384,16 +2384,16 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=48,
-                             convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                             convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage1_Conv_48a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -2407,10 +2407,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage1_DepthwiseConv96', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage1_Conv1x1_48b', dtype=tf.float32)
     layers.append(net)
@@ -2427,7 +2427,7 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -2441,10 +2441,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage2_DepthwiseConv192', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage2_Conv1x1_96b', dtype=tf.float32)
     layers.append(net)
@@ -2461,7 +2461,7 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -2475,10 +2475,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage3_DepthwiseConv384', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage3_Conv1x1_192b', dtype=tf.float32)
     layers.append(net)
@@ -2495,7 +2495,7 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -2509,10 +2509,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage4_DepthwiseConv768', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage4_Conv1x1_384b', dtype=tf.float32)
     layers.append(net)
@@ -2559,10 +2559,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1536,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -2581,7 +2581,7 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=1536,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -2595,10 +2595,10 @@ def SimpleV7X(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv1536', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_768b', dtype=tf.float32)
     layers.append(net)
@@ -2629,19 +2629,19 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=24,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage1_Conv_24a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage1_Conv1x1_48', dtype=tf.float32)
     layers.append(net)
@@ -2654,10 +2654,10 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage1_DepthwiseConv48', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=24,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage1_Conv1x1_24b', dtype=tf.float32)
     layers.append(net)
@@ -2665,19 +2665,19 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=48,
-                             convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                             convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage2_Conv_48a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage2_Conv1x1_96', dtype=tf.float32)
     layers.append(net)
@@ -2690,10 +2690,10 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage2_DepthwiseConv96', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=48,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage2_Conv1x1_48b', dtype=tf.float32)
     layers.append(net)
@@ -2701,19 +2701,19 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=96,
-                             convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                             convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage3_Conv_96a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage3_Conv1x1_192', dtype=tf.float32)
     layers.append(net)
@@ -2726,10 +2726,10 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage3_DepthwiseConv192', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=96,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage3_Conv1x1_96b', dtype=tf.float32)
     layers.append(net)
@@ -2737,19 +2737,19 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     concated = tf.concat([toconcat.output, net.output], axis=3)
     
     toconcat = Layers.Conv2D(concated, convChannels=192,
-                             convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                             convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='Stage4_Conv_192a', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Stage4_Conv1x1_384', dtype=tf.float32)
     layers.append(net)
@@ -2762,20 +2762,20 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Stage4_DepthwiseConv384', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=192,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Stage4_Conv1x1_192b', dtype=tf.float32)
     layers.append(net)
     
     concated = tf.concat([toconcat.output, net.output], axis=3)
     toadd = Layers.Conv2D(concated, convChannels=384,
-                          convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                          convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.Linear,
                           name='SepConv384Toadd', dtype=tf.float32)
     layers.append(toadd)
@@ -2812,10 +2812,10 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=768,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -2825,19 +2825,19 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toconcat = Layers.Conv2D(net.output, convChannels=384,
-                             convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                             convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
                              biasInit=Layers.ConstInit(0.0),
-                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                             batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                              activation=Layers.ReLU,
                              name='ConvExit384_1', dtype=tf.float32)
     layers.append(toconcat)
     
     net = Layers.Conv2D(toconcat.output, convChannels=768,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Exit_Conv1x1_768', dtype=tf.float32)
     layers.append(net)
@@ -2850,10 +2850,10 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
                                  name='Exit_DepthwiseConv768', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=384,
-                        convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                        convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.Linear,
                         name='Exit_Conv1x1_384b', dtype=tf.float32)
     layers.append(net)
@@ -2878,27 +2878,27 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
 def Xcpetion(standardized, step, ifTest, layers, numMiddle=8): 
     
     net = Layers.Conv2D(standardized, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry32_1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry64_1', dtype=tf.float32)
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -2921,10 +2921,10 @@ def Xcpetion(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_2', dtype=tf.float32)
     layers.append(toadd)
     
@@ -2950,10 +2950,10 @@ def Xcpetion(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_3', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3010,10 +3010,10 @@ def Xcpetion(standardized, step, ifTest, layers, numMiddle=8):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvExit1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3063,27 +3063,27 @@ def Xcpetion(standardized, step, ifTest, layers, numMiddle=8):
 def XcpetionM(standardized, step, ifTest, layers, numMiddle=8): 
     '''Xception M is better than Xcpetion'''
     net = Layers.Conv2D(standardized, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry32_1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry64_1', dtype=tf.float32)
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3106,10 +3106,10 @@ def XcpetionM(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_2', dtype=tf.float32)
@@ -3137,10 +3137,10 @@ def XcpetionM(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_3', dtype=tf.float32)
@@ -3199,10 +3199,10 @@ def XcpetionM(standardized, step, ifTest, layers, numMiddle=8):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -3254,27 +3254,27 @@ def XcpetionM(standardized, step, ifTest, layers, numMiddle=8):
 def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8): 
     '''Xception M2 is worse than Xcpetion'''
     net = Layers.Conv2D(standardized, convChannels=32,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry32_1', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='ConvEntry64_1', dtype=tf.float32)
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3297,10 +3297,10 @@ def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                          convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_2', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3326,10 +3326,10 @@ def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                          convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_3', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3386,10 +3386,10 @@ def XcpetionM2(standardized, step, ifTest, layers, numMiddle=8):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                          convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvExit1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3456,10 +3456,10 @@ def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3482,10 +3482,10 @@ def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_2', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3511,10 +3511,10 @@ def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_3', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3571,10 +3571,10 @@ def XcpetionM3(standardized, step, ifTest, layers, numMiddle=8):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[1, 1], convStride=[2, 2], convWD=wd,
+                          convKernel=[1, 1], convStride=[2, 2], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvExit1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3641,10 +3641,10 @@ def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3667,10 +3667,10 @@ def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_2', dtype=tf.float32)
@@ -3698,10 +3698,10 @@ def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_3', dtype=tf.float32)
@@ -3760,10 +3760,10 @@ def XcpetionM3X(standardized, step, ifTest, layers, numMiddle=2):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -3832,10 +3832,10 @@ def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           name='ConvEntry1x1_1', dtype=tf.float32)
     layers.append(toadd)
     
@@ -3859,10 +3859,10 @@ def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8):
     added = tf.concat([added, toadd.output], axis=-1)
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_2', dtype=tf.float32)
@@ -3891,10 +3891,10 @@ def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8):
     added = tf.concat([added, toadd.output], axis=-1)
     
     toadd = Layers.Conv2D(added, convChannels=728,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvEntry1x1_3', dtype=tf.float32)
@@ -3953,10 +3953,10 @@ def XcpetionM3C(standardized, step, ifTest, layers, numMiddle=8):
         conved = net.output + conved
     
     toadd = Layers.Conv2D(conved, convChannels=1024,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='ConvExit1x1_1', dtype=tf.float32)
@@ -4013,7 +4013,7 @@ def ResNet(standardized, step, ifTest, layers):
         kernelSize = [3, 3]
     
         net = Layers.Conv2D(x, convChannels=filters1,
-                            convKernel=kernelSize, convStride=[1, 1], convWD=wd,
+                            convKernel=kernelSize, convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4025,7 +4025,7 @@ def ResNet(standardized, step, ifTest, layers):
         layers.append(net)
         
         net = Layers.Conv2D(net.output, convChannels=filters2,
-                            convKernel=kernelSize, convStride=[1, 1], convWD=wd,
+                            convKernel=kernelSize, convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4037,7 +4037,7 @@ def ResNet(standardized, step, ifTest, layers):
         layers.append(net)
         
         net = Layers.Conv2D(net.output, convChannels=filters3,
-                            convKernel=kernelSize, convStride=[1, 1], convWD=wd,
+                            convKernel=kernelSize, convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4055,7 +4055,7 @@ def ResNet(standardized, step, ifTest, layers):
         kernelSize = [3, 3]
         
         net = Layers.Conv2D(x, convChannels=filters1,
-                            convKernel=[1, 1], convStride=stride, convWD=wd,
+                            convKernel=[1, 1], convStride=stride, conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4067,7 +4067,7 @@ def ResNet(standardized, step, ifTest, layers):
         layers.append(net)
         
         net = Layers.Conv2D(net.output, convChannels=filters2,
-                            convKernel=kernelSize, convStride=[1, 1], convWD=wd,
+                            convKernel=kernelSize, convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4079,7 +4079,7 @@ def ResNet(standardized, step, ifTest, layers):
         layers.append(net)
         
         net = Layers.Conv2D(net.output, convChannels=filters3,
-                            convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                            convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
                             activation=Layers.Linear,
@@ -4089,7 +4089,7 @@ def ResNet(standardized, step, ifTest, layers):
         layers.append(net)
         
         shortcut = Layers.Conv2D(x, convChannels=filters3,
-                                 convKernel=[1, 1], convStride=stride, convWD=wd,
+                                 convKernel=[1, 1], convStride=stride, conv_weight_decay=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
                                  biasInit=Layers.ConstInit(0.0),
                                  activation=Layers.Linear,
@@ -4105,7 +4105,7 @@ def ResNet(standardized, step, ifTest, layers):
         return net.output
     
     net = Layers.Conv2D(standardized, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.Linear,
@@ -4146,14 +4146,14 @@ def ResNet(standardized, step, ifTest, layers):
 def VGG(standardized, step, ifTest, layers): 
     '''It is hard to train VGG'''
     net = Layers.Conv2D(standardized, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv64a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -4161,14 +4161,14 @@ def VGG(standardized, step, ifTest, layers):
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv128a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -4178,28 +4178,28 @@ def VGG(standardized, step, ifTest, layers):
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv256a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv256b', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv256c', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -4209,28 +4209,28 @@ def VGG(standardized, step, ifTest, layers):
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv512a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv512b', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv512c', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
@@ -4257,35 +4257,35 @@ def VGG(standardized, step, ifTest, layers):
 def VGGM(standardized, step, ifTest, layers): 
     
     net = Layers.Conv2D(standardized, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv64b', dtype=tf.float32)
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv128a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=128,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[2, 2], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',
@@ -4293,33 +4293,33 @@ def VGGM(standardized, step, ifTest, layers):
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
                         activation=Layers.ReLU,
                         name='Conv256b', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv256c', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=256,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[2, 2], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',
@@ -4327,34 +4327,34 @@ def VGGM(standardized, step, ifTest, layers):
     layers.append(net)
     
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv512a', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv512b', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         name='Conv512c', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=512,
-                        convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
                         biasInit=Layers.ConstInit(0.0),
-                        bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
                         pool=True, poolSize=[2, 2], poolStride=[2, 2],
                         poolType=Layers.MaxPool, poolPadding='SAME',

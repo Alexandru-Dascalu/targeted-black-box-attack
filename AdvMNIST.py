@@ -12,87 +12,100 @@ wd = 1e-4
 NoiseRange = 255.0
 
 
-def Generator(images, targets, numSubnets, step, ifTest, layers):
+def create_generator(images, targets, num_experts, step, ifTest, layers):
+    # define encoder as a CNN with 4 conv2d layers
     with tf.variable_scope('Encoder', reuse=tf.AUTO_REUSE) as scope:
-        net = Layers.Conv2D(Preproc.normalise_images(images), convChannels=16, convKernel=[5, 5], convStride=[2, 2], convWD=wd,
-                            convInit=Layers.XavierInit, convPadding='SAME', biasInit=Layers.ConstInit(0.0), bn=True,
-                            step=step, ifTest=ifTest, epsilon=1e-5,
-                            activation=Layers.ReLU, name='Conv1', dtype=tf.float32)
-        layers.append(net)
-        net = Layers.Conv2D(net.output, convChannels=32,
-                            convKernel=[5, 5], convStride=[2, 2], convWD=wd,
-                            convInit=Layers.XavierInit, convPadding='SAME',
-                            biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
-                            activation=Layers.ReLU,
-                            name='Conv2', dtype=tf.float32)
-        layers.append(net)
-        net = Layers.Conv2D(net.output, convChannels=64,
-                            convKernel=[3, 3], convStride=[2, 2], convWD=wd,
-                            convInit=Layers.XavierInit, convPadding='SAME',
-                            biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
-                            activation=Layers.ReLU,
-                            name='Conv7b', dtype=tf.float32)
-        layers.append(net)
-        net = Layers.DeConv2D(net.output, convChannels=64, shapeOutput=[7, 7],
-                              convKernel=[3, 3], convStride=[2, 2], convWD=wd,
-                              convInit=Layers.XavierInit, convPadding='SAME',
-                              biasInit=Layers.ConstInit(0.0),
-                              bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
-                              activation=Layers.ReLU,
-                              reuse=tf.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
-        layers.append(net)
+        encoder = Layers.Conv2D(Preproc.normalise_images(images), convChannels=16, convKernel=[5, 5], convStride=[2, 2],
+                                conv_weight_decay=wd, convInit=Layers.XavierInit, convPadding='SAME',
+                                biasInit=Layers.ConstInit(0.0), batch_normalisation=True, step=step, ifTest=ifTest,
+                                epsilon=1e-5,
+                                activation=Layers.ReLU, name='Conv1', dtype=tf.float32)
+        layers.append(encoder)
+        encoder = Layers.Conv2D(encoder.output, convChannels=32, convKernel=[5, 5], convStride=[2, 2],
+                                conv_weight_decay=wd, convInit=Layers.XavierInit, convPadding='SAME',
+                                biasInit=Layers.ConstInit(0.0), batch_normalisation=True, step=step, ifTest=ifTest,
+                                epsilon=1e-5,
+                                activation=Layers.ReLU, name='Conv2', dtype=tf.float32)
+        layers.append(encoder)
+        encoder = Layers.Conv2D(encoder.output, convChannels=64,
+                                convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
+                                convInit=Layers.XavierInit, convPadding='SAME',
+                                biasInit=Layers.ConstInit(0.0),
+                                batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                activation=Layers.ReLU,
+                                name='Conv7b', dtype=tf.float32)
+        layers.append(encoder)
+        encoder = Layers.DeConv2D(encoder.output, convChannels=64, shapeOutput=[7, 7],
+                                  convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
+                                  convInit=Layers.XavierInit, convPadding='SAME',
+                                  biasInit=Layers.ConstInit(0.0),
+                                  batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                  activation=Layers.ReLU,
+                                  reuse=tf.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
+        layers.append(encoder)
 
+    # define decoder
     with tf.variable_scope('Decoder', reuse=tf.AUTO_REUSE) as scope:
-        subnets = []
-        for idx in range(numSubnets):
-            subnet = Layers.DeConv2D(net.output, convChannels=32, shapeOutput=[14, 14],
-                                     convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+        subnets_output = []
+        for idx in range(num_experts):
+            subnet = Layers.DeConv2D(encoder.output, convChannels=32, shapeOutput=[14, 14],
+                                     convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                                      convInit=Layers.XavierInit, convPadding='SAME',
                                      biasInit=Layers.ConstInit(0.0),
-                                     bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                     batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                      activation=Layers.ReLU,
                                      reuse=tf.AUTO_REUSE, name='G_DeConv96_' + str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnet = Layers.DeConv2D(subnet.output, convChannels=16, shapeOutput=[28, 28],
-                                     convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                                     convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                                      convInit=Layers.XavierInit, convPadding='SAME',
                                      biasInit=Layers.ConstInit(0.0),
-                                     bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                     batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                      activation=Layers.ReLU,
                                      reuse=tf.AUTO_REUSE, name='G_DeConv48_' + str(idx), dtype=tf.float32)
             layers.append(subnet)
+            # why is this a convolution layer and not deconv?
             subnet = Layers.Conv2D(subnet.output, convChannels=1,
-                                   convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                                   convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                                    convInit=Layers.NormalInit(0.01), convPadding='SAME',
                                    biasInit=Layers.ConstInit(0.0),
-                                   bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                   batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                    activation=Layers.Linear,
                                    reuse=tf.AUTO_REUSE, name='G_SepConv3_' + str(idx), dtype=tf.float32)
             layers.append(subnet)
-            subnets.append(tf.expand_dims(subnet.output, axis=-1))
-        subnets = tf.concat(subnets, axis=-1)
-        # weights = tf.one_hot(targets, 10)
-        weights = Layers.FullyConnected(tf.one_hot(targets, 10), outputSize=numSubnets, weightInit=Layers.XavierInit,
-                                        wd=wd,
-                                        biasInit=Layers.ConstInit(0.0),
-                                        activation=Layers.Softmax,
-                                        reuse=tf.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
-        layers.append(weights)
-        # moe = tf.transpose(tf.transpose(subnets, [1, 2, 3, 0, 4]) * weights, [3, 0, 1, 2, 4])
-        moe = tf.transpose(tf.transpose(subnets, [1, 2, 3, 0, 4]) * weights.output, [3, 0, 1, 2, 4])
-        noises = tf.nn.tanh(tf.reduce_mean(moe, -1)) * NoiseRange
+            subnets_output.append(tf.expand_dims(subnet.output, axis=-1))
+
+        subnets_output = tf.concat(subnets_output, axis=-1)
+        expert_weights_layer = Layers.FullyConnected(tf.one_hot(targets, 10), outputSize=num_experts,
+                                                     weightInit=Layers.XavierInit, wd=wd,
+                                                     biasInit=Layers.ConstInit(0.0),
+                                                     activation=Layers.Softmax,
+                                                     reuse=tf.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
+        layers.append(expert_weights_layer)
+
+        # re-shapes subnets from batch_size x 28 x 28 x 1 x num_experts to 28 x 28 x 1 x batch_size x num_experts, so
+        # that it can element-wise multiplied with the expert weights, which have a shape of batch_size x num_experts
+        subnets_output = tf.transpose(subnets_output, [1, 2, 3, 0, 4])
+
+        # performs element wise multiplication to apply the weights for each subnet output, then re-shape back into the
+        # original shape: batch_size x 28 x 28 x 1 x num_experts
+        mixture_of_experts = tf.transpose(subnets_output * expert_weights_layer.output,
+                                          [3, 0, 1, 2, 4])
+        # output of decoder is an average of the weighted outputs of each expert
+        mixture_of_experts = tf.reduce_mean(mixture_of_experts, -1)
+
+        # apply weighted sum layer activation
+        noises = tf.nn.tanh(mixture_of_experts) * NoiseRange
         print('Shape of Noises: ', noises.shape)
 
-    varGE = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Encoder')
-    varGD = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Decoder')
+    encoder_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Encoder')
+    decoder_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Decoder')
 
-    return noises, varGE, varGD
+    return noises, encoder_variables, decoder_variables
 
 
 def Predictor(images, step, ifTest, layers):
-    net = Layers.DepthwiseConv2D(preproc(tf.clip_by_value(images, 0, 255)), convChannels=16,
+    net = Layers.DepthwiseConv2D(Preproc.normalise_images(tf.clip_by_value(images, 0, 255)), convChannels=16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
                                  biasInit=Layers.ConstInit(0.0),
@@ -110,10 +123,10 @@ def Predictor(images, step, ifTest, layers):
     layers.append(net)
 
     toadd = Layers.Conv2D(net.output, convChannels=64,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -139,10 +152,10 @@ def Predictor(images, step, ifTest, layers):
     added = toadd.output + net.output
 
     toadd = Layers.Conv2D(added, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -171,10 +184,10 @@ def Predictor(images, step, ifTest, layers):
     added = toadd.output + net.output
 
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -224,7 +237,7 @@ def Predictor(images, step, ifTest, layers):
 
 
 def PredictorG(images, step, ifTest, layers):
-    net = Layers.DepthwiseConv2D(preproc(tf.clip_by_value(images, 0, 255)), convChannels=16,
+    net = Layers.DepthwiseConv2D(Preproc.normalise_images(tf.clip_by_value(images, 0, 255)), convChannels=16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
                                  biasInit=Layers.ConstInit(0.0),
@@ -240,10 +253,10 @@ def PredictorG(images, step, ifTest, layers):
                            name='P_SepConv96', dtype=tf.float32)
 
     toadd = Layers.Conv2D(net.output, convChannels=64,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -266,10 +279,10 @@ def PredictorG(images, step, ifTest, layers):
     added = toadd.output + net.output
 
     toadd = Layers.Conv2D(added, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -294,10 +307,10 @@ def PredictorG(images, step, ifTest, layers):
     added = toadd.output + net.output
 
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -352,7 +365,7 @@ HParamMNIST = {'BatchSize': 200,
 
 
 class NetMNIST(Nets.Net):
-    
+
     def __init__(self, shapeImages, enemy, numMiddle=2, HParam=HParamMNIST):
         Nets.Net.__init__(self)
 
@@ -381,9 +394,9 @@ class NetMNIST(Nets.Net):
 
             # Net
             with tf.variable_scope('Generator', reuse=tf.AUTO_REUSE) as scope:
-                self._generator, self._varsGE, self._varsGD = Generator(self._images, self._targets,
-                                                                        self._HParam['NumSubnets'], self._step,
-                                                                        self._ifTest, self._layers)
+                self._generator, self._varsGE, self._varsGD = create_generator(self._images, self._targets,
+                                                                               self._HParam['NumSubnets'], self._step,
+                                                                               self._ifTest, self._layers)
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.variable_scope('Predictor', reuse=tf.AUTO_REUSE) as scope:
@@ -718,7 +731,8 @@ if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
     net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2)
-    batchTrain, batchTest = MNIST.get_adversarial_data_generators(batch_size=HParamMNIST['BatchSize'], preproc_size=[28, 28, 1])
+    batchTrain, batchTest = MNIST.get_adversarial_data_generators(batch_size=HParamMNIST['BatchSize'],
+                                                                  preproc_size=[28, 28, 1])
     net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netmnist.ckpt')  # 90 and 94, 87 and 89
     # while True: 
     #     net.sample(batchTest, './AttackMNIST/netmnist.ckpt-4800')

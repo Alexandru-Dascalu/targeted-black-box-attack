@@ -66,9 +66,9 @@ class Layer(object):
 class Conv2D(Layer):
 
     def __init__(self, feature, convChannels,
-                 convKernel=[3, 3], convStride=[1, 1], convWD=None, convInit=XavierInit, convPadding='SAME',
+                 convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=None, convInit=XavierInit, convPadding='SAME',
                  bias=True, biasInit=ConstInit(0.0),
-                 bn=False, step=None, ifTest=None, epsilon=1e-5,
+                 batch_normalisation=False, step=None, ifTest=None, epsilon=1e-5,
                  activation=Linear,
                  pool=False, poolSize=[3, 3], poolStride=[2, 2], poolType=MaxPool, poolPadding='SAME',
                  reuse=False, name=None, dtype=tf.float32):
@@ -86,8 +86,8 @@ class Conv2D(Layer):
             conv = tf.nn.conv2d(feature, self._weights, self._strideConv, padding=self._typeConvPadding,
                                 name=scope.name+'_conv2d')
             self._variables.append(self._weights)
-            if convWD is not None:
-                decay = tf.multiply(tf.nn.l2_loss(self._weights), convWD, name=scope.name+'l2_wd')
+            if conv_weight_decay is not None:
+                decay = tf.multiply(tf.nn.l2_loss(self._weights), conv_weight_decay, name=scope.name + 'l2_wd')
                 self._losses.append(decay)
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
@@ -97,8 +97,8 @@ class Conv2D(Layer):
                 conv = conv + self._bias
                 self._variables.append(self._bias)
 
-            self._bn = bn
-            if bn:
+            self._bn = batch_normalisation
+            if batch_normalisation:
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
@@ -161,12 +161,12 @@ class Conv2D(Layer):
                 'Pooling Size: ' + str(self._sizePooling) + '; '  + 'Pooling Size: ' + str(self._stridePooling) + '; '  +
                 'Pooling Padding: ' + self._typePoolPadding + '; '  + 'Activation: ' + activation + ']')
 
-class DeConv2D(Layer):
 
+class DeConv2D(Layer):
     def __init__(self, feature, convChannels, shapeOutput=None,
-                 convKernel=[3, 3], convStride=[1, 1], convWD=None, convInit=XavierInit, convPadding='SAME',
+                 convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=None, convInit=XavierInit, convPadding='SAME',
                  bias=True, biasInit=ConstInit(0.0),
-                 bn=False, step=None, ifTest=None, epsilon=1e-5,
+                 batch_normalisation=False, step=None, ifTest=None, epsilon=1e-5,
                  activation=Linear,
                  pool=False, poolSize=[3, 3], poolStride=[2, 2], poolType=MaxPool, poolPadding='SAME',
                  reuse=False, name=None, dtype=tf.float32):
@@ -188,8 +188,8 @@ class DeConv2D(Layer):
             conv = tf.nn.conv2d_transpose(feature, self._weights, self._shapeOutput, self._strideConv, padding=self._typeConvPadding,
                                           name=scope.name+'_conv2d_transpose')
             self._variables.append(self._weights)
-            if convWD is not None:
-                decay = tf.multiply(tf.nn.l2_loss(self._weights), convWD, name=scope.name+'l2_wd')
+            if conv_weight_decay is not None:
+                decay = tf.multiply(tf.nn.l2_loss(self._weights), conv_weight_decay, name=scope.name + 'l2_wd')
                 self._losses.append(decay)
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
@@ -199,8 +199,8 @@ class DeConv2D(Layer):
                 conv = conv + self._bias
                 self._variables.append(self._bias)
 
-            self._bn = bn
-            if bn:
+            self._bn = batch_normalisation
+            if batch_normalisation:
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]

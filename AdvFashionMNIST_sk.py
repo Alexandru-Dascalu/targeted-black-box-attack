@@ -25,34 +25,34 @@ def preproc(images):
 def Generator(images, targets, numSubnets, step, ifTest, layers):   
     with tf.variable_scope('Encoder', reuse=tf.AUTO_REUSE) as scope: 
         net = Layers.Conv2D(preproc(images), convChannels=16,
-                            convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                            convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Conv1', dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=32,
-                            convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                            convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Conv2', dtype=tf.float32)
         layers.append(net)
         net = Layers.Conv2D(net.output, convChannels=64,
-                            convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                            convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                             convInit=Layers.XavierInit, convPadding='SAME',
                             biasInit=Layers.ConstInit(0.0),
-                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                            batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                             activation=Layers.ReLU,
                             name='Conv7b', dtype=tf.float32)
         layers.append(net)
         net = Layers.DeConv2D(net.output, convChannels=64, shapeOutput=[7, 7],
-                              convKernel=[3, 3], convStride=[2, 2], convWD=wd,
+                              convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
                               convInit=Layers.XavierInit, convPadding='SAME',
                               biasInit=Layers.ConstInit(0.0),
-                              bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                              batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                               activation=Layers.ReLU,
                               reuse=tf.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
         layers.append(net)
@@ -61,26 +61,26 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
         subnets = []
         for idx in range(numSubnets): 
             subnet = Layers.DeConv2D(net.output, convChannels=32, shapeOutput=[14, 14],
-                                     convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                                     convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                                      convInit=Layers.XavierInit, convPadding='SAME',
                                      biasInit=Layers.ConstInit(0.0),
-                                     bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                     batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                      activation=Layers.ReLU,
                                      reuse=tf.AUTO_REUSE, name='G_DeConv96_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnet = Layers.DeConv2D(subnet.output, convChannels=16, shapeOutput=[28, 28],
-                                     convKernel=[5, 5], convStride=[2, 2], convWD=wd,
+                                     convKernel=[5, 5], convStride=[2, 2], conv_weight_decay=wd,
                                      convInit=Layers.XavierInit, convPadding='SAME',
                                      biasInit=Layers.ConstInit(0.0),
-                                     bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                     batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                      activation=Layers.ReLU,
                                      reuse=tf.AUTO_REUSE, name='G_DeConv48_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnet = Layers.Conv2D(subnet.output, convChannels=1,
-                                   convKernel=[3, 3], convStride=[1, 1], convWD=wd,
+                                   convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                                    convInit=Layers.NormalInit(0.01), convPadding='SAME',
                                    biasInit=Layers.ConstInit(0.0),
-                                   bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                                   batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                    activation=Layers.Linear,
                                    reuse=tf.AUTO_REUSE, name='G_SepConv3_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
@@ -121,10 +121,10 @@ def Predictor(images, step, ifTest, layers):
     layers.append(net)
     
     toadd = Layers.Conv2D(net.output, convChannels=64,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -150,10 +150,10 @@ def Predictor(images, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -182,10 +182,10 @@ def Predictor(images, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -250,10 +250,10 @@ def PredictorG(images, step, ifTest, layers):
                            name='P_SepConv96', dtype=tf.float32)
     
     toadd = Layers.Conv2D(net.output, convChannels=64,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -276,10 +276,10 @@ def PredictorG(images, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=128,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
@@ -304,10 +304,10 @@ def PredictorG(images, step, ifTest, layers):
     added = toadd.output + net.output
     
     toadd = Layers.Conv2D(added, convChannels=256,
-                          convKernel=[1, 1], convStride=[1, 1], convWD=wd,
+                          convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
                           biasInit=Layers.ConstInit(0.0),
-                          bn=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                          batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
                           pool=True, poolSize=[3, 3], poolStride=[2, 2],
                           poolType=Layers.MaxPool, poolPadding='SAME',
