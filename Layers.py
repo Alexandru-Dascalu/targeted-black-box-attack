@@ -369,6 +369,7 @@ class SepConv2D(Layer):
                 'Pooling Size: ' + str(self._sizePooling) + '; '  + 'Pooling Size: ' + str(self._stridePooling) + '; '  +
                 'Pooling Padding: ' + self._typePoolPadding + '; '  + 'Activation: ' + activation + ']')
 
+
 class DepthwiseConv2D(Layer):
 
     def __init__(self, feature, convChannels,

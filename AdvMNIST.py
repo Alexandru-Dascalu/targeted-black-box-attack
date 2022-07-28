@@ -104,7 +104,8 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
     return noises, encoder_variables, decoder_variables
 
 
-def Predictor(images, step, ifTest, layers):
+def create_simulator(images, step, ifTest, layers):
+    # define simulator with an architecture almost identical to SimpleNet in the paper
     net = Layers.DepthwiseConv2D(Preproc.normalise_images(tf.clip_by_value(images, 0, 255)), convChannels=16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
@@ -236,7 +237,9 @@ def Predictor(images, step, ifTest, layers):
     return logits.output
 
 
-def PredictorG(images, step, ifTest, layers):
+# why does this not add its layers to the layers list?
+def create_simulator_G(images, step, ifTest):
+    # create identical structure to the net in create_predictor, including the same layer names
     net = Layers.DepthwiseConv2D(Preproc.normalise_images(tf.clip_by_value(images, 0, 255)), convChannels=16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
@@ -366,257 +369,214 @@ HParamMNIST = {'BatchSize': 200,
 
 class NetMNIST(Nets.Net):
 
-    def __init__(self, shapeImages, enemy, numMiddle=2, HParam=HParamMNIST):
+    def __init__(self, image_shape, enemy, hyper_params=None):
         Nets.Net.__init__(self)
 
-        if HParam is None:
-            HParam = HParamMNIST
-        self._init = False
-        self._numMiddle = numMiddle
-        self._HParam = HParam
+        if hyper_params is None:
+            hyper_params = HParamMNIST
+
+        self.hyper_params = hyper_params
         self._graph = tf.Graph()
         self._sess = tf.Session(graph=self._graph)
+
+        # the targeted neural network model
         self._enemy = enemy
 
         with self._graph.as_default():
+            # variable to keep check if network is being tested or trained
             self._ifTest = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
-            self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
+            # define operations to set ifTest variable
             self._phaseTrain = tf.assign(self._ifTest, False)
             self._phaseTest = tf.assign(self._ifTest, True)
 
-            # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[self._HParam['BatchSize']] + shapeImages,
-                                          name='CIFAR10_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']],
-                                          name='CIFAR10_labels')
-            self._targets = tf.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']],
-                                           name='CIFAR10_targets')
+            self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
 
-            # Net
+            # Inputs
+            self._images = tf.placeholder(dtype=tf.float32, shape=[self.hyper_params['BatchSize']] + image_shape,
+                                          name='MNIST_images')
+            self._labels = tf.placeholder(dtype=tf.int64, shape=[self.hyper_params['BatchSize']],
+                                          name='MNIST_labels')
+            self._adversarial_targets = tf.placeholder(dtype=tf.int64, shape=[self.hyper_params['BatchSize']],
+                                                       name='MNIST_targets')
+
+            # define generator
             with tf.variable_scope('Generator', reuse=tf.AUTO_REUSE) as scope:
-                self._generator, self._varsGE, self._varsGD = create_generator(self._images, self._targets,
-                                                                               self._HParam['NumSubnets'], self._step,
+                self._generator, self._varsGE, self._varsGD = create_generator(self._images, self._adversarial_targets,
+                                                                               self.hyper_params['NumSubnets'],
+                                                                               self._step,
                                                                                self._ifTest, self._layers)
             self._noises = self._generator
-            self._adversary = self._noises + self._images
+            self._adversarial_images = self._noises + self._images
+
+            # define simulator
             with tf.variable_scope('Predictor', reuse=tf.AUTO_REUSE) as scope:
-                self._predictor = Predictor(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorG(self._adversary, self._step, self._ifTest, self._layers)
+                self._predictor = create_simulator(self._images, self._step, self._ifTest, self._layers)
+
+                # what is the point of this??? Why is the generator training against a different simulator, which is
+                # not trained to match the target model? Why is one simulator trained on normal images, and another on
+                # adversarial images?
+                self._predictorG = create_simulator_G(self._adversarial_images, self._step, self._ifTest)
+
+            # define inference as hard label prediction of simulator on natural images
             self._inference = self.inference(self._predictor)
+            # accuracy is how often simulator prediction matches the prediction of the target net
             self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
+
             self._loss = 0
-            self._updateOps = []
             for elem in self._layers:
                 if len(elem.losses) > 0:
                     for tmp in elem.losses:
                         self._loss += tmp
+
+            self._updateOps = []
             for elem in self._layers:
                 if len(elem.update_ops) > 0:
                     for tmp in elem.update_ops:
                         self._updateOps.append(tmp)
-            self._lossPredictor = self.lossClassify(self._predictor, self._labels, name='lossP') + self._loss
-            self._lossGenerator = self.lossClassify(self._predictorG, self._targets, name='lossG') + self._HParam[
-                'NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
+
+            # simulator loss matches simulator output against output of target model
+            self._lossSimulator = self.loss(self._predictor, self._labels, name='lossP') + self._loss
+            # generator trains to produce perturbations that make the simulator produce the desired target labels
+            self._lossGenerator = self.loss(self._predictorG, self._adversarial_targets, name='lossG') + \
+                                  self.hyper_params[
+                                      'NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
             print(self.summary)
             print("\n Begin Training: \n")
 
             # Saver
             self._saver = tf.train.Saver(max_to_keep=5)
 
-    def preproc(self, images):
-        # Preprocessings
-        casted = tf.cast(images, tf.float32)
-        standardized = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
-
-        return standardized
-
     def inference(self, logits):
         return tf.argmax(logits, axis=-1, name='inference')
 
-    def lossClassify(self, logits, labels, name='cross_entropy'):
+    def loss(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
         self._layers.append(net)
         return net.output
 
-    def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
+    def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
             # self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
             # global_step=self._step, \
             # decay_steps=self._HParam['DecayAfter']*5, \
             # decay_rate=0.2) + self._HParam['MinLearningRate']
-            self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
-            self._lr2 = tf.Variable(self._HParam['LearningRate'], trainable=False)
+            self._lr = tf.Variable(self.hyper_params['LearningRate'], trainable=False)
+            self._lr2 = tf.Variable(self.hyper_params['LearningRate'], trainable=False)
             # self._lr2 = tf.train.exponential_decay(self._HParam['LearningRate'], \
             # global_step=self._step, \
             # decay_steps=self._HParam['DecayAfter'], \
             # decay_rate=0.5) + self._HParam['MinLearningRate']
+
             self._lrDecay1 = tf.assign(self._lr, self._lr * 0.1)
             self._lrDecay2 = tf.assign(self._lr2, self._lr2 * 0.1)
             self._stepInc = tf.assign(self._step, self._step + 1)
+
             self._varsG = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
             self._varsP = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
-            self._optimizerG = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
-            self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor,
-                                                                                       var_list=self._varsP)
-            gradientsG = self._optimizerG.compute_gradients(self._lossGenerator, var_list=self._varsG)
-            capped_gvs = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
-            self._optimizerG = self._optimizerG.apply_gradients(capped_gvs)
-            # self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
-            # self._lrDecay1 = tf.assign(self._lr, self._lr * 0.1)
-            # self._stepInc = tf.assign(self._step, self._step+1)
-            # self._varsP = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
-            # self._optimizerGE = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
-            # self._optimizerGD = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
-            # self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
-            # gradientsGE = self._optimizerGE.compute_gradients(self._lossGenerator, var_list=self._varsGE)
-            # gradientsGD = self._optimizerGD.compute_gradients(self._lossGenerator, var_list=self._varsGD)
-            # capped_GE = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsGE]
-            # capped_GD = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsGD]
-            ## capped_GE = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsGE]
-            ## capped_GD = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsGD]
-            # self._optimizerGE = self._optimizerGE.apply_gradients(capped_GE)
-            # self._optimizerGD = self._optimizerGD.apply_gradients(capped_GD)
-            # with tf.control_dependencies([self._optimizerGE, self._optimizerGD]):
-            # self._optimizerG = tf.no_op()
-            # self._optimizerG = tf.train.AdamOptimizer(self._lr*10, epsilon=1e-8).minimize(self._lossGenerator, var_list=self._varsG)
-            # self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
 
-            # Initialize all
+            # define optimiser without the minimisation operation. This is done later, after the gradients are clipped
+            self._optimizerG = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
+            gradientsG = self._optimizerG.compute_gradients(self._lossGenerator, var_list=self._varsG)
+            # clip gradients
+            clipped_gradients = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
+            self._optimizerG = self._optimizerG.apply_gradients(clipped_gradients)
+
+            # define simulator optimisation operation
+            self._optimizerS = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossSimulator,
+                                                                                       var_list=self._varsP)
+
+            # Initialize all variables
             self._sess.run(tf.global_variables_initializer())
 
-            if pathLoad is not None:
-                self.load(pathLoad)
+            # check if it should re-start training from a known checkpoint
+            if path_load is not None:
+                self.load(path_load)
             else:
+                # Warm up simulator by training it to match target model hard labels with normal images as input
                 print('Warming up. ')
                 for idx in range(300):
-                    data, label, target = next(genTrain)
-                    label = np.array(self._enemy.infer(data))
-                    loss, accu, _ = \
-                        self._sess.run([self._lossPredictor,
-                                        self._accuracy, self._optimizerP],
-                                       feed_dict={self._images: data,
-                                                  self._labels: label,
-                                                  self._targets: target})
+                    data, _, _ = next(training_data_generator)
+                    # get hard label prediction of target model
+                    target_model_labels = np.array(self._enemy.infer(data))
+                    loss, accu, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                                                   feed_dict={self._images: data, self._labels: target_model_labels})
+
                     print('\rPredictor => Step: ', idx - 300,
                           '; Loss: %.3f' % loss,
                           '; Accuracy: %.3f' % accu,
                           end='')
 
+                # test pre-trained model on some test set data
                 warmupAccu = 0.0
                 for idx in range(50):
-                    data, label, target = next(genTest)
-                    label = np.array(self._enemy.infer(data))
-                    loss, accu, _ = \
-                        self._sess.run([self._lossPredictor,
-                                        self._accuracy, self._optimizerP],
-                                       feed_dict={self._images: data,
-                                                  self._labels: label,
-                                                  self._targets: target})
+                    data, _, _ = next(test_data_generator)
+                    target_model_labels = np.array(self._enemy.infer(data))
+                    loss, accu, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                                                   feed_dict={self._images: data, self._labels: target_model_labels})
                     warmupAccu += accu / 50
-                print('\nWarmup Accuracy: ', warmupAccu)
+                print('\nWarmup Test Accuracy: ', warmupAccu)
 
-            self.evaluate(genTest)
-            #             self.sample(genTest)
+            self.evaluate(test_data_generator)
 
             self._sess.run([self._phaseTrain])
-            if pathSave is not None:
-                self.save(pathSave)
+            if path_save is not None:
+                self.save(path_save)
 
+            # Start main training loop
             globalStep = 0
-
-            # print('Warming up. ')
-            # for idx in range(300):
-            # data, label, target = next(genTrain)
-            # adversary = data
-            # label = self._enemy.infer(adversary)
-            # loss, accu, _ = \
-            # self._sess.run([self._lossPredictor, \
-            # self._accuracy, self._optimizerP], \
-            # feed_dict={self._images: adversary, \
-            # self._labels: label, \
-            # self._targets: target})
-            # print('\rPredictor => Step: ', idx-300, \
-            # '; Loss: %.3f'% loss, \
-            # '; Accuracy: %.3f'% accu, \
-            # end='')
-
-            # warmupAccu = 0.0
-            # for idx in range(50):
-            # data, label, target = next(genTest)
-            # adversary = data
-            # label = self._enemy.infer(adversary)
-            # loss, accu, _ = \
-            # self._sess.run([self._lossPredictor, \
-            # self._accuracy, self._optimizerP], \
-            # feed_dict={self._images: adversary, \
-            # self._labels: label, \
-            # self._targets: target})
-            # warmupAccu += accu / 50
-            # print('\nWarmup Accuracy: ', warmupAccu)
             # self._sess.run(self._lrDecay2)
-
-            while globalStep < self._HParam['TotalSteps']:
-
+            while globalStep < self.hyper_params['TotalSteps']:
                 self._sess.run(self._stepInc)
 
-                for _ in range(self._HParam['NumPredictor']):
-                    data, label, target = next(genTrain)
-                    adversary = self._sess.run(self._adversary,
-                                               feed_dict={self._images: data,
-                                                          self._labels: label,
-                                                          self._targets: target})
-                    # label = self._enemy.infer(data)
-                    # loss, accu, globalStep, _ = \
-                    # self._sess.run([self._lossPredictor, \
-                    # self._accuracy, self._step, self._optimizerP], \
-                    # feed_dict={self._images: data, \
-                    # self._labels: label, \
-                    # self._targets: target})
-                    data = data + (np.random.rand(self._HParam['BatchSize'], 28, 28, 1) - 0.5) * NoiseRange * 2
-                    label = self._enemy.infer(data)
-                    loss, accu, globalStep, _ = \
-                        self._sess.run([self._lossPredictor,
-                                        self._accuracy, self._step, self._optimizerP],
-                                       feed_dict={self._images: data,
-                                                  self._labels: label,
-                                                  self._targets: target})
-                    # data = np.random.rand(self._HParam['BatchSize'], 28, 28, 1) * 255
-                    # label = self._enemy.infer(data)
-                    # loss, accu, globalStep, _ = \
-                    # self._sess.run([self._lossPredictor, \
-                    # self._accuracy, self._step, self._optimizerP], \
-                    # feed_dict={self._images: data, \
-                    # self._labels: label, \
-                    # self._targets: target})
-                    label = self._enemy.infer(adversary)
-                    loss, accu, globalStep, _ = \
-                        self._sess.run([self._lossPredictor,
-                                        self._accuracy, self._step, self._optimizerP],
-                                       feed_dict={self._images: adversary,
-                                                  self._labels: label,
-                                                  self._targets: target})
+                # train simulator for a couple of steps
+                for _ in range(self.hyper_params['NumPredictor']):
+                    # ground truth labels are not needed for training the simulator
+                    data, _, target_label = next(training_data_generator)
+                    # adds Random uniform noise to normal data
+                    data = data + (np.random.rand(self.hyper_params['BatchSize'], 28, 28, 1) - 0.5) * NoiseRange * 2
+
+                    # perform one optimisation step to train simulator so it has the same predictions as the target
+                    # model does on normal images with noise
+                    target_model_labels = self._enemy.infer(data)
+                    loss, accu, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                                                                self._optimizerS],
+                                                               feed_dict={self._images: data,
+                                                                          self._labels: target_model_labels})
+
+                    # generate adversarial image
+                    adversarial_images = self._sess.run(self._adversarial_images,
+                                                        feed_dict={self._images: data,
+                                                                   self._adversarial_targets: target_label})
+                    # perform one optimisation step to train simulator so it has the same predictions as the target
+                    # model does on adversarial images
+                    target_model_labels = self._enemy.infer(adversarial_images)
+                    loss, accu, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                                                                self._optimizerS],
+                                                               feed_dict={self._images: adversarial_images,
+                                                                          self._labels: target_model_labels})
+
                     print('\rPredictor => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
                           '; Accuracy: %.3f' % accu,
                           end='')
 
-                for _ in range(self._HParam['NumGenerator']):
-                    data, label, target = next(genTrain)
+                for _ in range(self.hyper_params['NumGenerator']):
+                    data, target_model_labels, target_label = next(training_data_generator)
                     refs = self._enemy.infer(data)
                     for idx in range(data.shape[0]):
-                        if refs[idx] == target[idx]:
+                        if refs[idx] == target_label[idx]:
                             tmp = random.randint(0, 9)
                             while tmp == refs[idx]:
                                 tmp = random.randint(0, 9)
-                            target[idx] = tmp
-                    loss, adversary, globalStep, _ = \
+                            target_label[idx] = tmp
+                    loss, adversarial_images, globalStep, _ = \
                         self._sess.run([self._lossGenerator,
-                                        self._adversary, self._step, self._optimizerG],
+                                        self._adversarial_images, self._step, self._optimizerG],
                                        feed_dict={self._images: data,
                                                   self._labels: refs,
-                                                  self._targets: target})
-                    results = self._enemy.infer(adversary)
-                    accu = np.mean(target == results)
+                                                  self._adversarial_targets: target_label})
+                    results = self._enemy.infer(adversarial_images)
+                    accu = np.mean(target_label == results)
                     fullrate = np.mean(refs != results)
 
                     print('\rGenerator => Step: ', globalStep,
@@ -625,25 +585,25 @@ class NetMNIST(Nets.Net):
                           '; FoolRate: %.3f' % fullrate,
                           end='')
 
-                if globalStep % self._HParam['ValidateAfter'] == 0:
-                    self.evaluate(genTest)
-                    data, label, target = next(genTest)
-                    adversary = \
-                        self._sess.run(self._adversary,
+                if globalStep % self.hyper_params['ValidateAfter'] == 0:
+                    self.evaluate(test_data_generator)
+                    data, target_model_labels, target_label = next(test_data_generator)
+                    adversarial_images = \
+                        self._sess.run(self._adversarial_images,
                                        feed_dict={self._images: data,
-                                                  self._labels: label,
-                                                  self._targets: target})
+                                                  self._labels: target_model_labels,
+                                                  self._adversarial_targets: target_label})
                     refs = self._enemy.infer(data)
-                    results = self._enemy.infer(adversary)
-                    print((adversary - data)[1, 10:15, 10:15])
-                    print((adversary - data).max())
-                    print((adversary - data).min())
+                    results = self._enemy.infer(adversarial_images)
+                    print((adversarial_images - data)[1, 10:15, 10:15])
+                    print((adversarial_images - data).max())
+                    print((adversarial_images - data).min())
                     # print(np.max(adversary-data))
                     # print(np.min(adversary-data))
                     # print((adversary-data)[1])
-                    print(list(zip(label, refs, results, target)))
-                    if pathSave is not None:
-                        self.save(pathSave)
+                    print(list(zip(target_model_labels, refs, results, target_label)))
+                    if path_save is not None:
+                        self.save(path_save)
                     self._sess.run([self._phaseTrain])
 
                 # if globalStep == 1501:
@@ -661,7 +621,7 @@ class NetMNIST(Nets.Net):
         totalAccu = 0.0
         totalFullRate = 0.0
         self._sess.run([self._phaseTest])
-        for _ in range(self._HParam['TestSteps']):
+        for _ in range(self.hyper_params['TestSteps']):
             data, label, target = next(genTest)
             refs = self._enemy.infer(data)
             for idx in range(data.shape[0]):
@@ -672,10 +632,10 @@ class NetMNIST(Nets.Net):
                     target[idx] = tmp
             loss, adversary = \
                 self._sess.run([self._lossGenerator,
-                                self._adversary],
+                                self._adversarial_images],
                                feed_dict={self._images: data,
                                           self._labels: refs,
-                                          self._targets: target})
+                                          self._adversarial_targets: target})
             adversary = adversary.clip(0, 255).astype(np.uint8)
             results = self._enemy.infer(adversary)
             accu = np.mean(target == results)
@@ -683,9 +643,9 @@ class NetMNIST(Nets.Net):
             totalLoss += loss
             totalAccu += accu
             totalFullRate += fullrate
-        totalLoss /= self._HParam['TestSteps']
-        totalAccu /= self._HParam['TestSteps']
-        totalFullRate /= self._HParam['TestSteps']
+        totalLoss /= self.hyper_params['TestSteps']
+        totalAccu /= self.hyper_params['TestSteps']
+        totalFullRate /= self.hyper_params['TestSteps']
         print('\nTest: Loss: ', totalLoss,
               '; Accu: ', totalAccu,
               '; FullRate: ', totalFullRate)
@@ -704,10 +664,10 @@ class NetMNIST(Nets.Net):
                     tmp = random.randint(0, 9)
                 target[idx] = tmp
         loss, adversary = \
-            self._sess.run([self._lossGenerator, self._adversary],
+            self._sess.run([self._lossGenerator, self._adversarial_images],
                            feed_dict={self._images: data,
                                       self._labels: refs,
-                                      self._targets: target})
+                                      self._adversarial_targets: target})
         adversary = adversary.clip(0, 255).astype(np.uint8)
         results = self._enemy.infer(adversary)
 
@@ -730,10 +690,10 @@ class NetMNIST(Nets.Net):
 if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
-    net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2)
+    net = NetMNIST([28, 28, 1], enemy=enemy)
     batchTrain, batchTest = MNIST.get_adversarial_data_generators(batch_size=HParamMNIST['BatchSize'],
                                                                   preproc_size=[28, 28, 1])
-    net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netmnist.ckpt')  # 90 and 94, 87 and 89
+    net.train(batchTrain, batchTest, path_save='./AttackMNIST/netmnist.ckpt')  # 90 and 94, 87 and 89
     # while True: 
     #     net.sample(batchTest, './AttackMNIST/netmnist.ckpt-4800')
 
