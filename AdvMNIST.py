@@ -590,22 +590,21 @@ class NetMNIST(Nets.Net):
                 # evaluate on test set data every once in a while
                 if globalStep % self.hyper_params['ValidateAfter'] == 0:
                     self.evaluate(test_data_generator)
-                    data, target_model_labels, target_label = next(test_data_generator)
-                    adversarial_images = \
-                        self._sess.run(self._adversarial_images,
-                                       feed_dict={self._images: data,
-                                                  self._labels: target_model_labels,
-                                                  self._adversarial_targets: target_label})
+
+                    # this code is just for generating some more adversarial noise for test images, and printing
+                    # information about them
+                    data, _, target_label = next(test_data_generator)
+                    adversarial_images = self._sess.run(self._adversarial_images,
+                                                        feed_dict={self._images: data,
+                                                                   self._adversarial_targets: target_label})
+
                     target_model_labels = self._enemy.infer(data)
                     target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
                     print((adversarial_images - data)[1, 10:15, 10:15])
                     print((adversarial_images - data).max())
                     print((adversarial_images - data).min())
-                    # print(np.max(adversary-data))
-                    # print(np.min(adversary-data))
-                    # print((adversary-data)[1])
-                    print(list(zip(target_model_labels, target_model_labels, target_model_adversarial_predictions,
-                                   target_label)))
+                    print(list(zip(target_model_labels, target_model_adversarial_predictions, target_label)))
+
                     if path_save is not None:
                         self.save(path_save)
                     self._sess.run([self._phaseTrain])
@@ -621,9 +620,9 @@ class NetMNIST(Nets.Net):
         if path is not None:
             self.load(path)
 
-        totalLoss = 0.0
-        totalAccuracy = 0.0
-        total_fool_rate = 0.0
+        total_loss = 0.0
+        total_ufr = 0.0
+        total_tfr = 0.0
 
         self._sess.run([self._phaseTest])
         for _ in range(self.hyper_params['TestSteps']):
@@ -639,26 +638,27 @@ class NetMNIST(Nets.Net):
                     target_labels[idx] = tmp
 
             # evaluate generator loss on test data
-            loss, adversary = self._sess.run([self._lossGenerator, self._adversarial_images],
+            loss, adversarial_images = self._sess.run([self._lossGenerator, self._adversarial_images],
                                              feed_dict={self._images: data,
                                                         self._adversarial_targets: target_labels})
 
-            adversary = adversary.clip(0, 255).astype(np.uint8)
-            target_model_adversarial_predictions = self._enemy.infer(adversary)
+            adversarial_images = adversarial_images.clip(0, 255).astype(np.uint8)
+            target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
 
-            accu = np.mean(target_labels == target_model_adversarial_predictions)
-            fool_rate = np.mean(target_model_labels != target_model_adversarial_predictions)
+            tfr = np.mean(target_labels == target_model_adversarial_predictions)
+            # ufr should really be based on ground truth label, not what the target model predicted on the normal image
+            ufr = np.mean(target_model_labels != target_model_adversarial_predictions)
 
-            totalLoss += loss
-            totalAccuracy += accu
-            total_fool_rate += fool_rate
+            total_loss += loss
+            total_tfr += tfr
+            total_ufr += ufr
 
-        totalLoss /= self.hyper_params['TestSteps']
-        totalAccuracy /= self.hyper_params['TestSteps']
-        total_fool_rate /= self.hyper_params['TestSteps']
-        print('\nTest: Loss: ', totalLoss,
-              '; TFR: ', totalAccuracy,
-              '; UFR: ', total_fool_rate)
+        total_loss /= self.hyper_params['TestSteps']
+        total_tfr /= self.hyper_params['TestSteps']
+        total_ufr /= self.hyper_params['TestSteps']
+        print('\nTest: Loss: ', total_loss,
+              '; TFR: ', total_tfr,
+              '; UFR: ', total_ufr)
 
     def sample(self, genTest, path=None):
         if path is not None:
