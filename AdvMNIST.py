@@ -438,8 +438,7 @@ class NetMNIST(Nets.Net):
             self._lossSimulator = self.loss(self._predictor, self._labels, name='lossP') + self._loss
             # generator trains to produce perturbations that make the simulator produce the desired target labels
             self._lossGenerator = self.loss(self._predictorG, self._adversarial_targets, name='lossG') + \
-                                  self.hyper_params[
-                                      'NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
+                                  self.hyper_params['NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
             print(self.summary)
             print("\n Begin Training: \n")
 
@@ -560,15 +559,19 @@ class NetMNIST(Nets.Net):
                           '; Accuracy: %.3f' % accu,
                           end='')
 
+                # train generator for a couple of steps
                 for _ in range(self.hyper_params['NumGenerator']):
-                    data, target_model_labels, target_label = next(training_data_generator)
-                    refs = self._enemy.infer(data)
+                    data, _, target_label = next(training_data_generator)
+                    target_model_labels = self._enemy.infer(data)
+
+                    # check that target labels are different than what the target model already predicts
                     for idx in range(data.shape[0]):
-                        if refs[idx] == target_label[idx]:
+                        if target_model_labels[idx] == target_label[idx]:
                             tmp = random.randint(0, 9)
-                            while tmp == refs[idx]:
+                            while tmp == target_model_labels[idx]:
                                 tmp = random.randint(0, 9)
                             target_label[idx] = tmp
+                            
                     loss, adversarial_images, globalStep, _ = \
                         self._sess.run([self._lossGenerator,
                                         self._adversarial_images, self._step, self._optimizerG],
@@ -577,7 +580,7 @@ class NetMNIST(Nets.Net):
                                                   self._adversarial_targets: target_label})
                     results = self._enemy.infer(adversarial_images)
                     accu = np.mean(target_label == results)
-                    fullrate = np.mean(refs != results)
+                    fullrate = np.mean(target_model_labels != results)
 
                     print('\rGenerator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
@@ -593,7 +596,7 @@ class NetMNIST(Nets.Net):
                                        feed_dict={self._images: data,
                                                   self._labels: target_model_labels,
                                                   self._adversarial_targets: target_label})
-                    refs = self._enemy.infer(data)
+                    target_model_labels = self._enemy.infer(data)
                     results = self._enemy.infer(adversarial_images)
                     print((adversarial_images - data)[1, 10:15, 10:15])
                     print((adversarial_images - data).max())
@@ -601,7 +604,7 @@ class NetMNIST(Nets.Net):
                     # print(np.max(adversary-data))
                     # print(np.min(adversary-data))
                     # print((adversary-data)[1])
-                    print(list(zip(target_model_labels, refs, results, target_label)))
+                    print(list(zip(target_model_labels, target_model_labels, results, target_label)))
                     if path_save is not None:
                         self.save(path_save)
                     self._sess.run([self._phaseTrain])
