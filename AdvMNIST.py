@@ -604,7 +604,8 @@ class NetMNIST(Nets.Net):
                     # print(np.max(adversary-data))
                     # print(np.min(adversary-data))
                     # print((adversary-data)[1])
-                    print(list(zip(target_model_labels, target_model_labels, target_model_adversarial_predictions, target_label)))
+                    print(list(zip(target_model_labels, target_model_labels, target_model_adversarial_predictions,
+                                   target_label)))
                     if path_save is not None:
                         self.save(path_save)
                     self._sess.run([self._phaseTrain])
@@ -616,42 +617,48 @@ class NetMNIST(Nets.Net):
                     self._sess.run(self._lrDecay1)
                     print('Learning rate decayed. ')
 
-    def evaluate(self, genTest, path=None):
+    def evaluate(self, test_data_generator, path=None):
         if path is not None:
             self.load(path)
 
         totalLoss = 0.0
-        totalAccu = 0.0
-        totalFullRate = 0.0
+        totalAccuracy = 0.0
+        total_fool_rate = 0.0
+
         self._sess.run([self._phaseTest])
         for _ in range(self.hyper_params['TestSteps']):
-            data, label, target = next(genTest)
-            refs = self._enemy.infer(data)
+            data, _, target_labels = next(test_data_generator)
+            target_model_labels = self._enemy.infer(data)
+
+            # for each batch image, make sure target label is different than the predicted label by the target model
             for idx in range(data.shape[0]):
-                if refs[idx] == target[idx]:
+                if target_model_labels[idx] == target_labels[idx]:
                     tmp = random.randint(0, 9)
-                    while tmp == refs[idx]:
+                    while tmp == target_model_labels[idx]:
                         tmp = random.randint(0, 9)
-                    target[idx] = tmp
-            loss, adversary = \
-                self._sess.run([self._lossGenerator,
-                                self._adversarial_images],
-                               feed_dict={self._images: data,
-                                          self._labels: refs,
-                                          self._adversarial_targets: target})
+                    target_labels[idx] = tmp
+
+            # evaluate generator loss on test data
+            loss, adversary = self._sess.run([self._lossGenerator, self._adversarial_images],
+                                             feed_dict={self._images: data,
+                                                        self._adversarial_targets: target_labels})
+
             adversary = adversary.clip(0, 255).astype(np.uint8)
-            results = self._enemy.infer(adversary)
-            accu = np.mean(target == results)
-            fullrate = np.mean(refs != results)
+            target_model_adversarial_predictions = self._enemy.infer(adversary)
+
+            accu = np.mean(target_labels == target_model_adversarial_predictions)
+            fool_rate = np.mean(target_model_labels != target_model_adversarial_predictions)
+
             totalLoss += loss
-            totalAccu += accu
-            totalFullRate += fullrate
+            totalAccuracy += accu
+            total_fool_rate += fool_rate
+
         totalLoss /= self.hyper_params['TestSteps']
-        totalAccu /= self.hyper_params['TestSteps']
-        totalFullRate /= self.hyper_params['TestSteps']
+        totalAccuracy /= self.hyper_params['TestSteps']
+        total_fool_rate /= self.hyper_params['TestSteps']
         print('\nTest: Loss: ', totalLoss,
-              '; Accu: ', totalAccu,
-              '; FullRate: ', totalFullRate)
+              '; TFR: ', totalAccuracy,
+              '; UFR: ', total_fool_rate)
 
     def sample(self, genTest, path=None):
         if path is not None:
