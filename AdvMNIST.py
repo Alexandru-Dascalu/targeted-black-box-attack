@@ -571,23 +571,23 @@ class NetMNIST(Nets.Net):
                             while tmp == target_model_labels[idx]:
                                 tmp = random.randint(0, 9)
                             target_label[idx] = tmp
-                            
-                    loss, adversarial_images, globalStep, _ = \
-                        self._sess.run([self._lossGenerator,
-                                        self._adversarial_images, self._step, self._optimizerG],
-                                       feed_dict={self._images: data,
-                                                  self._labels: refs,
-                                                  self._adversarial_targets: target_label})
-                    results = self._enemy.infer(adversarial_images)
-                    accu = np.mean(target_label == results)
-                    fullrate = np.mean(target_model_labels != results)
+
+                    loss, adversarial_images, globalStep, _ = self._sess.run([self._lossGenerator,
+                                                                              self._adversarial_images, self._step,
+                                                                              self._optimizerG],
+                                                                             feed_dict={self._images: data,
+                                                                                        self._adversarial_targets: target_label})
+                    target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
+                    accu = np.mean(target_label == target_model_adversarial_predictions)
+                    fool_rate = np.mean(target_model_labels != target_model_adversarial_predictions)
 
                     print('\rGenerator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
                           '; Accuracy: %.3f' % accu,
-                          '; FoolRate: %.3f' % fullrate,
+                          '; Fool Rate: %.3f' % fool_rate,
                           end='')
 
+                # evaluate on test set data every once in a while
                 if globalStep % self.hyper_params['ValidateAfter'] == 0:
                     self.evaluate(test_data_generator)
                     data, target_model_labels, target_label = next(test_data_generator)
@@ -597,14 +597,14 @@ class NetMNIST(Nets.Net):
                                                   self._labels: target_model_labels,
                                                   self._adversarial_targets: target_label})
                     target_model_labels = self._enemy.infer(data)
-                    results = self._enemy.infer(adversarial_images)
+                    target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
                     print((adversarial_images - data)[1, 10:15, 10:15])
                     print((adversarial_images - data).max())
                     print((adversarial_images - data).min())
                     # print(np.max(adversary-data))
                     # print(np.min(adversary-data))
                     # print((adversary-data)[1])
-                    print(list(zip(target_model_labels, target_model_labels, results, target_label)))
+                    print(list(zip(target_model_labels, target_model_labels, target_model_adversarial_predictions, target_label)))
                     if path_save is not None:
                         self.save(path_save)
                     self._sess.run([self._phaseTrain])
