@@ -271,24 +271,24 @@ class NetMNIST(Nets.Net):
         self._numMiddle    = numMiddle
         self._HParam       = HParam
         self._graph        = tf.Graph()
-        self._sess         = tf.Session(graph=self._graph)
+        self._sess         = tf.compat.v1.Session(graph=self._graph)
         
         with self._graph.as_default(): 
             self._ifTest        = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
             self._step          = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
-            self._phaseTrain    = tf.assign(self._ifTest, False)
-            self._phaseTest     = tf.assign(self._ifTest, True)
+            self._phaseTrain    = tf.compat.v1.assign(self._ifTest, False)
+            self._phaseTest     = tf.compat.v1.assign(self._ifTest, True)
             
             # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
+            self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
                                                   name='CIFAR10_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[None], \
+            self._labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[None], \
                                                   name='CIFAR10_labels_class')
             
             # Net
             self._body      = self.body(self._images)
             self._inference = self.inference(self._body)
-            self._accuracy  = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
+            self._accuracy  = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss      = self.lossClassify(self._body, self._labels)
             self._loss      = 0
             self._updateOps = []
@@ -304,7 +304,7 @@ class NetMNIST(Nets.Net):
             print("\n Begin Training: \n")
                     
             # Saver
-            self._saver = tf.train.Saver(max_to_keep=5)
+            self._saver = tf.compat.v1.train.Saver(max_to_keep=5)
         
     def preproc(self, images):
         # Preprocessings
@@ -330,7 +330,7 @@ class NetMNIST(Nets.Net):
         return class10.output
         
     def inference(self, logits):
-        return tf.argmax(logits, axis=-1, name='inference')
+        return tf.argmax(input=logits, axis=-1, name='inference')
     
     def lossClassify(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
@@ -339,13 +339,13 @@ class NetMNIST(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
+            self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], \
                                                   global_step=self._step, \
                                                   decay_steps=self._HParam['DecayAfter']*10, \
                                                   decay_rate=0.30) + self._HParam['MinLearningRate']
-            self._optimizer = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
+            self._optimizer = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
             # Initialize all
-            self._sess.run(tf.global_variables_initializer())
+            self._sess.run(tf.compat.v1.global_variables_initializer())
             
             if pathLoad is not None:
                 self.load(pathLoad)

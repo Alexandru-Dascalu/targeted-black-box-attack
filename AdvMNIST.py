@@ -18,7 +18,7 @@ def preproc(images):
     return standardized
 
 def Generator(images, targets, numSubnets, step, ifTest, layers):   
-    with tf.variable_scope('Encoder', reuse=tf.AUTO_REUSE) as scope: 
+    with tf.compat.v1.variable_scope('Encoder', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
         net = Layers.Conv2D(preproc(images), convChannels=16, \
                         convKernel=[5, 5], convStride=[2, 2], convWD=wd, \
                         convInit=Layers.XavierInit, convPadding='SAME', \
@@ -49,10 +49,10 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
                             biasInit=Layers.ConstInit(0.0), \
                             bn=True, step=step, ifTest=ifTest, epsilon=1e-5, \
                             activation=Layers.ReLU, \
-                            reuse=tf.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
+                            reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
         layers.append(net)
         
-    with tf.variable_scope('Decoder', reuse=tf.AUTO_REUSE) as scope: 
+    with tf.compat.v1.variable_scope('Decoder', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
         subnets = []
         for idx in range(numSubnets): 
             subnet = Layers.DeConv2D(net.output, convChannels=32, shapeOutput=[14, 14], \
@@ -61,7 +61,7 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
                                 biasInit=Layers.ConstInit(0.0), \
                                 bn=True, step=step, ifTest=ifTest, epsilon=1e-5, \
                                 activation=Layers.ReLU, \
-                                reuse=tf.AUTO_REUSE, name='G_DeConv96_'+str(idx), dtype=tf.float32)
+                                reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv96_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnet = Layers.DeConv2D(subnet.output, convChannels=16, shapeOutput=[28, 28], \
                                 convKernel=[5, 5], convStride=[2, 2], convWD=wd, \
@@ -69,7 +69,7 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
                                 biasInit=Layers.ConstInit(0.0), \
                                 bn=True, step=step, ifTest=ifTest, epsilon=1e-5, \
                                 activation=Layers.ReLU, \
-                                reuse=tf.AUTO_REUSE, name='G_DeConv48_'+str(idx), dtype=tf.float32)
+                                reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv48_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnet = Layers.Conv2D(subnet.output, convChannels=1, \
                                 convKernel=[3, 3], convStride=[1, 1], convWD=wd, \
@@ -77,7 +77,7 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
                                 biasInit=Layers.ConstInit(0.0), \
                                 bn=True, step=step, ifTest=ifTest, epsilon=1e-5, \
                                 activation=Layers.Linear, \
-                                reuse=tf.AUTO_REUSE, name='G_SepConv3_'+str(idx), dtype=tf.float32)
+                                reuse=tf.compat.v1.AUTO_REUSE, name='G_SepConv3_'+str(idx), dtype=tf.float32)
             layers.append(subnet)
             subnets.append(tf.expand_dims(subnet.output, axis=-1))
         subnets = tf.concat(subnets, axis=-1)
@@ -85,15 +85,15 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
         weights = Layers.FullyConnected(tf.one_hot(targets, 10), outputSize=numSubnets, weightInit=Layers.XavierInit, wd=wd, \
                                     biasInit=Layers.ConstInit(0.0), \
                                     activation=Layers.Softmax, \
-                                    reuse=tf.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
+                                    reuse=tf.compat.v1.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
         layers.append(weights)
         #moe = tf.transpose(tf.transpose(subnets, [1, 2, 3, 0, 4]) * weights, [3, 0, 1, 2, 4])
-        moe = tf.transpose(tf.transpose(subnets, [1, 2, 3, 0, 4]) * weights.output, [3, 0, 1, 2, 4])
-        noises = tf.nn.tanh(tf.reduce_mean(moe, -1)) * NoiseRange
+        moe = tf.transpose(a=tf.transpose(a=subnets, perm=[1, 2, 3, 0, 4]) * weights.output, perm=[3, 0, 1, 2, 4])
+        noises = tf.nn.tanh(tf.reduce_mean(input_tensor=moe, axis=-1)) * NoiseRange
         print('Shape of Noises: ', noises.shape)
     
-    varGE = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Encoder')
-    varGD = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Decoder')
+    varGE = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Encoder')
+    varGD = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Decoder')
     
     return noises, varGE, varGD
 
@@ -223,7 +223,7 @@ def Predictor(images, step, ifTest, layers):
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd, \
                                 biasInit=Layers.ConstInit(0.0), \
                                 activation=Layers.Linear, \
-                                reuse=tf.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
+                                reuse=tf.compat.v1.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
     layers.append(logits)
     
     return logits.output
@@ -338,7 +338,7 @@ def PredictorG(images, step, ifTest, layers):
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd, \
                                 biasInit=Layers.ConstInit(0.0), \
                                 activation=Layers.Linear, \
-                                reuse=tf.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
+                                reuse=tf.compat.v1.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
     
     return logits.output
 
@@ -364,33 +364,33 @@ class NetMNIST(Nets.Net):
         self._numMiddle    = numMiddle
         self._HParam       = HParam
         self._graph        = tf.Graph()
-        self._sess         = tf.Session(graph=self._graph)
+        self._sess         = tf.compat.v1.Session(graph=self._graph)
         self._enemy        = enemy
         
         with self._graph.as_default(): 
             self._ifTest        = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
             self._step          = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
-            self._phaseTrain    = tf.assign(self._ifTest, False)
-            self._phaseTest     = tf.assign(self._ifTest, True)
+            self._phaseTrain    = tf.compat.v1.assign(self._ifTest, False)
+            self._phaseTest     = tf.compat.v1.assign(self._ifTest, True)
             
             # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[self._HParam['BatchSize']]+shapeImages, \
+            self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[self._HParam['BatchSize']]+shapeImages, \
                                           name='CIFAR10_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']], \
+            self._labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']], \
                                           name='CIFAR10_labels')
-            self._targets = tf.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']], \
+            self._targets = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._HParam['BatchSize']], \
                                           name='CIFAR10_targets')
             
             # Net
-            with tf.variable_scope('Generator', reuse=tf.AUTO_REUSE) as scope: 
+            with tf.compat.v1.variable_scope('Generator', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
                 self._generator, self._varsGE, self._varsGD = Generator(self._images, self._targets, self._HParam['NumSubnets'], self._step, self._ifTest, self._layers)
             self._noises = self._generator
             self._adversary = self._noises + self._images
-            with tf.variable_scope('Predictor', reuse=tf.AUTO_REUSE) as scope: 
+            with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
                 self._predictor = Predictor(self._images, self._step, self._ifTest, self._layers)
                 self._predictorG = PredictorG(self._adversary, self._step, self._ifTest, self._layers)
             self._inference = self.inference(self._predictor)
-            self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
+            self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0
             self._updateOps = []
             for elem in self._layers: 
@@ -402,12 +402,12 @@ class NetMNIST(Nets.Net):
                     for tmp in elem.updateOps: 
                         self._updateOps.append(tmp)
             self._lossPredictor = self.lossClassify(self._predictor, self._labels, name='lossP') + self._loss
-            self._lossGenerator = self.lossClassify(self._predictorG, self._targets, name='lossG') + self._HParam['NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
+            self._lossGenerator = self.lossClassify(self._predictorG, self._targets, name='lossG') + self._HParam['NoiseDecay'] * tf.reduce_mean(input_tensor=tf.norm(tensor=self._noises)) + self._loss
             print(self.summary)
             print("\n Begin Training: \n")
                     
             # Saver
-            self._saver = tf.train.Saver(max_to_keep=5)
+            self._saver = tf.compat.v1.train.Saver(max_to_keep=5)
         
     def preproc(self, images):
         # Preprocessings
@@ -417,7 +417,7 @@ class NetMNIST(Nets.Net):
         return standardized
         
     def inference(self, logits):
-        return tf.argmax(logits, axis=-1, name='inference')
+        return tf.argmax(input=logits, axis=-1, name='inference')
     
     def lossClassify(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
@@ -436,13 +436,13 @@ class NetMNIST(Nets.Net):
                                                  #global_step=self._step, \
                                                  #decay_steps=self._HParam['DecayAfter'], \
                                                  #decay_rate=0.5) + self._HParam['MinLearningRate']
-            self._lrDecay1 = tf.assign(self._lr, self._lr * 0.1)
-            self._lrDecay2 = tf.assign(self._lr2, self._lr2 * 0.1)
-            self._stepInc = tf.assign(self._step, self._step+1)
-            self._varsG = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
-            self._varsP = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
-            self._optimizerG = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
-            self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
+            self._lrDecay1 = tf.compat.v1.assign(self._lr, self._lr * 0.1)
+            self._lrDecay2 = tf.compat.v1.assign(self._lr2, self._lr2 * 0.1)
+            self._stepInc = tf.compat.v1.assign(self._step, self._step+1)
+            self._varsG = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
+            self._varsP = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
+            self._optimizerG = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8)
+            self._optimizerP = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
             gradientsG = self._optimizerG.compute_gradients(self._lossGenerator, var_list=self._varsG)
             capped_gvs = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
             self._optimizerG = self._optimizerG.apply_gradients(capped_gvs)
@@ -467,7 +467,7 @@ class NetMNIST(Nets.Net):
             #self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
             
             # Initialize all
-            self._sess.run(tf.global_variables_initializer())
+            self._sess.run(tf.compat.v1.global_variables_initializer())
             
             if pathLoad is not None:
                 self.load(pathLoad)
