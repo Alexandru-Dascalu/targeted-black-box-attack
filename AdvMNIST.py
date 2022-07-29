@@ -489,7 +489,7 @@ class NetMNIST(Nets.Net):
                     # get hard label prediction of target model
                     target_model_labels = np.array(self._enemy.infer(data))
                     loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
-                                                   feed_dict={self._images: data, self._labels: target_model_labels})
+                                                  feed_dict={self._images: data, self._labels: target_model_labels})
 
                     print('\rPredictor => Step: ', idx - 300,
                           '; Loss: %.3f' % loss,
@@ -502,7 +502,7 @@ class NetMNIST(Nets.Net):
                     data, _, _ = next(test_data_generator)
                     target_model_labels = np.array(self._enemy.infer(data))
                     loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
-                                                   feed_dict={self._images: data, self._labels: target_model_labels})
+                                                  feed_dict={self._images: data, self._labels: target_model_labels})
                     warmupAccu += tfr / 50
                 print('\nWarmup Test Accuracy: ', warmupAccu)
 
@@ -529,9 +529,9 @@ class NetMNIST(Nets.Net):
                     # model does on normal images with noise
                     target_model_labels = self._enemy.infer(data)
                     loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
-                                                                self._optimizerS],
-                                                               feed_dict={self._images: data,
-                                                                          self._labels: target_model_labels})
+                                                               self._optimizerS],
+                                                              feed_dict={self._images: data,
+                                                                         self._labels: target_model_labels})
 
                     # generate adversarial image
                     adversarial_images = self._sess.run(self._adversarial_images,
@@ -541,9 +541,9 @@ class NetMNIST(Nets.Net):
                     # model does on adversarial images
                     target_model_labels = self._enemy.infer(adversarial_images)
                     loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
-                                                                self._optimizerS],
-                                                               feed_dict={self._images: adversarial_images,
-                                                                          self._labels: target_model_labels})
+                                                               self._optimizerS],
+                                                              feed_dict={self._images: adversarial_images,
+                                                                         self._labels: target_model_labels})
 
                     print('\rPredictor => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
@@ -630,8 +630,8 @@ class NetMNIST(Nets.Net):
 
             # evaluate generator loss on test data
             loss, adversarial_images = self._sess.run([self._lossGenerator, self._adversarial_images],
-                                             feed_dict={self._images: data,
-                                                        self._adversarial_targets: target_labels})
+                                                      feed_dict={self._images: data,
+                                                                 self._adversarial_targets: target_labels})
 
             adversarial_images = adversarial_images.clip(0, 255).astype(np.uint8)
             target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
@@ -651,34 +651,39 @@ class NetMNIST(Nets.Net):
               '; TFR: ', total_tfr,
               '; UFR: ', total_ufr)
 
-    def sample(self, genTest, path=None):
+    def sample(self, test_data_generator, path=None):
         if path is not None:
             self.load(path)
 
         self._sess.run([self._phaseTest])
-        data, label, target = next(genTest)
-        refs = self._enemy.infer(data)
+        data, label, target = next(test_data_generator)
+        target_model_labels = self._enemy.infer(data)
+
+        # for each test image, check that the adversarial target is different than what the target model already
+        # predicts on the normal image
         for idx in range(data.shape[0]):
-            if refs[idx] == target[idx]:
+            if target_model_labels[idx] == target[idx]:
                 tmp = random.randint(0, 9)
-                while tmp == refs[idx]:
+                while tmp == target_model_labels[idx]:
                     tmp = random.randint(0, 9)
                 target[idx] = tmp
-        loss, adversary = \
-            self._sess.run([self._lossGenerator, self._adversarial_images],
-                           feed_dict={self._images: data,
-                                      self._labels: refs,
-                                      self._adversarial_targets: target})
-        adversary = adversary.clip(0, 255).astype(np.uint8)
-        results = self._enemy.infer(adversary)
+
+        # create adversarial images
+        loss, adversarial_images = self._sess.run([self._lossGenerator, self._adversarial_images],
+                                                  feed_dict={self._images: data,
+                                                             self._adversarial_targets: target})
+        adversarial_images = adversarial_images.clip(0, 255).astype(np.uint8)
+        adversarial_labels = self._enemy.infer(adversarial_images)
 
         for idx in range(10):
             for jdx in range(3):
+                # show sampled adversarial image
                 plt.subplot(10, 6, idx * 6 + jdx * 2 + 1)
                 plt.imshow(data[idx * 3 + jdx, :, :, 0], cmap='gray')
                 plt.subplot(10, 6, idx * 6 + jdx * 2 + 2)
-                plt.imshow(adversary[idx * 3 + jdx, :, :, 0], cmap='gray')
-                print([refs[idx * 3 + jdx], results[idx * 3 + jdx], target[idx * 3 + jdx]])
+                plt.imshow(adversarial_images[idx * 3 + jdx, :, :, 0], cmap='gray')
+                # print target model prediction on original image, the prediction on adversarial image, and target label
+                print([target_model_labels[idx * 3 + jdx], adversarial_labels[idx * 3 + jdx], target[idx * 3 + jdx]])
         plt.show()
 
     def save(self, path):
