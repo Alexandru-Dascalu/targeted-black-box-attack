@@ -488,12 +488,13 @@ class AdvNetMNIST(Nets.Net):
                     data, _, _ = next(training_data_generator)
                     # get hard label prediction of target model
                     target_model_labels = np.array(self._enemy.infer(data))
-                    loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
-                                                  feed_dict={self._images: data, self._labels: target_model_labels})
+                    loss, accuracy, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                                                       feed_dict={self._images: data,
+                                                                  self._labels: target_model_labels})
 
-                    print('\rPredictor => Step: ', idx - 300,
+                    print('\rSimulator => Step: ', idx - 300,
                           '; Loss: %.3f' % loss,
-                          '; Accuracy: %.3f' % tfr,
+                          '; Accuracy: %.3f' % accuracy,
                           end='')
 
                 # test pre-trained model on some test set data
@@ -501,9 +502,10 @@ class AdvNetMNIST(Nets.Net):
                 for idx in range(50):
                     data, _, _ = next(test_data_generator)
                     target_model_labels = np.array(self._enemy.infer(data))
-                    loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
-                                                  feed_dict={self._images: data, self._labels: target_model_labels})
-                    warmupAccu += tfr / 50
+                    loss, accuracy, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                                                       feed_dict={self._images: data,
+                                                                  self._labels: target_model_labels})
+                    warmupAccu += accuracy / 50
                 print('\nWarmup Test Accuracy: ', warmupAccu)
 
             self.evaluate(test_data_generator)
@@ -528,10 +530,10 @@ class AdvNetMNIST(Nets.Net):
                     # perform one optimisation step to train simulator so it has the same predictions as the target
                     # model does on normal images with noise
                     target_model_labels = self._enemy.infer(data)
-                    loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
-                                                               self._optimizerS],
-                                                              feed_dict={self._images: data,
-                                                                         self._labels: target_model_labels})
+                    loss, accuracy, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                                                                    self._optimizerS],
+                                                                   feed_dict={self._images: data,
+                                                                              self._labels: target_model_labels})
 
                     # generate adversarial image
                     adversarial_images = self._sess.run(self._adversarial_images,
@@ -540,14 +542,14 @@ class AdvNetMNIST(Nets.Net):
                     # perform one optimisation step to train simulator so it has the same predictions as the target
                     # model does on adversarial images
                     target_model_labels = self._enemy.infer(adversarial_images)
-                    loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
-                                                               self._optimizerS],
-                                                              feed_dict={self._images: adversarial_images,
-                                                                         self._labels: target_model_labels})
+                    loss, accuracy, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                                                                    self._optimizerS],
+                                                                   feed_dict={self._images: adversarial_images,
+                                                                              self._labels: target_model_labels})
 
-                    print('\rPredictor => Step: ', globalStep,
+                    print('\rSimulator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
-                          '; Accuracy: %.3f' % tfr,
+                          '; Accuracy: %.3f' % accuracy,
                           end='')
 
                 # train generator for a couple of steps
@@ -600,9 +602,6 @@ class AdvNetMNIST(Nets.Net):
                         self.save(path_save)
                     self._sess.run([self._phaseTrain])
 
-                # if globalStep == 1501:
-                # self._sess.run(self._lrDecay1)
-
                 if (globalStep % 5400 == 0 or globalStep % 8100 == 0) and globalStep < 10000:
                     self._sess.run(self._lrDecay1)
                     print('Learning rate decayed. ')
@@ -647,7 +646,7 @@ class AdvNetMNIST(Nets.Net):
         total_loss /= self.hyper_params['TestSteps']
         total_tfr /= self.hyper_params['TestSteps']
         total_ufr /= self.hyper_params['TestSteps']
-        print('\nTest: Loss: ', total_loss,
+        print('\nTest: Generator Loss: ', total_loss,
               '; TFR: ', total_tfr,
               '; UFR: ', total_ufr)
 
