@@ -14,7 +14,24 @@ class Net:
         self._loss = None
         self._updataOp = None
         self._saver = None
-        self._sess = None
+
+        self._graph = tf.Graph()
+        self._sess = tf.Session(graph=self._graph)
+
+        with self._graph.as_default():
+            self.training_losses = tf.Variable([], trainable=False, validate_shape=False, shape=tf.TensorShape(None),
+                                               name="traininglosses")
+            self.training_accuracies = tf.Variable([], trainable=False, validate_shape=False,
+                                                   shape=tf.TensorShape(None), name="trainingaccuracies")
+
+        # self.test_losses = tf.Variable([], trainable=False, shape=tf.TensorShape(None), name="testlosses")
+        # self.test_accuracies = tf.Variable([], trainable=False, shape=tf.TensorShape(None), name="testaccuracies")
+
+        # self.training_losses = []
+        # self.training_accuracies = []
+        #
+        self.test_losses = []
+        self.test_accuracies = []
 
     def body(self, images):
         """

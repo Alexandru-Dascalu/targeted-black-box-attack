@@ -3,6 +3,7 @@ import h5py
 import numpy as np
 
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 import Preproc
 import Layers
@@ -159,6 +160,7 @@ def get_adversarial_data_generators(batch_size, preproc_size=None):
 
 
 class NetMNIST(Nets.Net):
+    # 10000-15000 steps is enough
     HParamMNIST = {'BatchSize': 200,
                    'LearningRate': 1e-3,
                    'MinLearningRate': 1e-5,
@@ -190,8 +192,6 @@ class NetMNIST(Nets.Net):
 
         self._init = False
         self._hyper_params = hyper_params
-        self._graph = tf.Graph()
-        self._sess = tf.Session(graph=self._graph)
 
         with self._graph.as_default():
             # variable to keep check if network is being tested or trained
@@ -297,6 +297,13 @@ class NetMNIST(Nets.Net):
                 # what does this do exactly?
                 self._sess.run(self._updateOps)
 
+                # self.training_losses.append(loss)
+                new_value = tf.stack([self.training_losses, tf.constant(loss)])
+                self._sess.run([tf.assign(self.training_losses, new_value)])
+                # self.training_accuracies.append(accu * 100)
+                self._sess.run(
+                    [tf.assign(self.training_accuracies, tf.stack([self.training_accuracies, tf.constant(accuracy)]))])
+
                 # logging
                 print('\rStep: ', step, '; loss: %.3f' % loss, '; accuracy: %.3f' % accuracy, end='')
 
@@ -331,6 +338,9 @@ class NetMNIST(Nets.Net):
         # calculate average loss and accuracy across the mini-batches in all test iterations
         avg_loss = sum_loss / self._hyper_params['TestSteps']
         avg_accuracy = sum_accuracy / self._hyper_params['TestSteps']
+        self.test_losses.append(avg_loss)
+        self.test_accuracies.append(avg_accuracy)
+
         print('\nTest: Loss: ', avg_loss,
               '; Accu: ', avg_accuracy)
 
@@ -350,4 +360,20 @@ if __name__ == '__main__':
     net = NetMNIST([28, 28, 1])  # 8
     batchTrain, batchTest = get_data_generators(batch_size=NetMNIST.HParamMNIST['BatchSize'])
     net.train(batchTrain, batchTest, path_save='./ClassifyMNIST/netmnist.ckpt')
+
+    plt.plot(net.training_losses.value(), label="Training set")
+    plt.plot(net.test_losses, label="Test set")
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss")
+    plt.title("MNIST loss during training")
+    plt.legend()
+    plt.show()
+
+    plt.plot(net.training_accuracies.value(), label="Training set")
+    plt.plot(net.test_accuracies, label="Test set")
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+    plt.title("MNIST accuracy during training")
+    plt.legend()
+    plt.show()
 # The best configuration is 64 features and 8 middle layers

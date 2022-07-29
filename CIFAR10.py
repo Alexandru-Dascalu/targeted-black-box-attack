@@ -495,6 +495,7 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
         
     return genTrainBatch(BatchSize), genTestBatch(BatchSize)
 
+# 20000 - 25000 steps is enough
 HParamCIFAR10 = {'BatchSize': 200, 
                   'LearningRate': 1e-3, 
                   'MinLearningRate': 1e-5, 
