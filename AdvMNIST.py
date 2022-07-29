@@ -367,7 +367,7 @@ HParamMNIST = {'BatchSize': 200,
                'TotalSteps': 60000}
 
 
-class NetMNIST(Nets.Net):
+class AdvNetMNIST(Nets.Net):
 
     def __init__(self, image_shape, enemy, hyper_params=None):
         Nets.Net.__init__(self)
@@ -696,12 +696,13 @@ class NetMNIST(Nets.Net):
 if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
-    net = NetMNIST([28, 28, 1], enemy=enemy)
+
+    net = AdvNetMNIST([28, 28, 1], enemy=enemy)
     batchTrain, batchTest = MNIST.get_adversarial_data_generators(batch_size=HParamMNIST['BatchSize'],
                                                                   preproc_size=[28, 28, 1])
     net.train(batchTrain, batchTest, path_save='./AttackMNIST/netmnist.ckpt')  # 90 and 94, 87 and 89
-    # while True: 
-    #     net.sample(batchTest, './AttackMNIST/netmnist.ckpt-4800')
+    while True:
+        net.sample(batchTest, './AttackMNIST/netmnist.ckpt-4800')
 
     # NN: Accu:  0.8760999999999997 ; FullRate:  0.8996999999999999
     # 255: Accu:  0.9229999999999997 ; FullRate:  0.9318999999999997
