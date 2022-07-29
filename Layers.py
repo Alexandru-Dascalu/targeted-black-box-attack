@@ -81,7 +81,7 @@ class Conv2D(Layer):
             self._strideConv      = [1]+convStride+[1]
             self._typeConvPadding = convPadding
             self._weights = tf.compat.v1.get_variable(scope.name+'_weights', \
-                                            self._sizeKernel, initializer=convInit, dtype=dtype)
+                                            self._sizeKernel, initializer=convInit, dtype=dtype, use_resource=False)
             conv = tf.nn.conv2d(input=feature, filters=self._weights, strides=self._strideConv, padding=self._typeConvPadding, \
                                name=scope.name+'_conv2d')
             self._variables.append(self._weights)
@@ -92,7 +92,7 @@ class Conv2D(Layer):
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias: 
                 self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels], \
-                                                   initializer=biasInit, dtype=dtype)
+                                                   initializer=biasInit, dtype=dtype, use_resource=False)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
             
@@ -102,13 +102,15 @@ class Conv2D(Layer):
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
                 self._offset  = tf.compat.v1.get_variable(scope.name+'_offset', \
-                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
-                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype,
+                                                          use_resource=False)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype,
+                                                          use_resource=False)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -183,7 +185,7 @@ class DeConv2D(Layer):
                 self._shapeOutput = tf.TensorShape([feature.shape[0]] + shapeOutput + [convChannels])
             self._typeConvPadding = convPadding
             self._weights = tf.compat.v1.get_variable(scope.name+'_weights', \
-                                            self._sizeKernel, initializer=convInit, dtype=dtype)
+                                            self._sizeKernel, initializer=convInit, dtype=dtype, use_resource=False)
             conv = tf.nn.conv2d_transpose(feature, self._weights, self._shapeOutput, self._strideConv, padding=self._typeConvPadding, \
                                name=scope.name+'_conv2d_transpose')
             self._variables.append(self._weights)
@@ -194,7 +196,7 @@ class DeConv2D(Layer):
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias: 
                 self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels], \
-                                                   initializer=biasInit, dtype=dtype)
+                                                   initializer=biasInit, dtype=dtype, use_resource=False)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
             
@@ -204,13 +206,13 @@ class DeConv2D(Layer):
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
                 self._offset  = tf.compat.v1.get_variable(scope.name+'_offset', \
-                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
-                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -283,9 +285,9 @@ class SepConv2D(Layer):
             self._strideConv      = [1]+convStride+[1]
             self._typeConvPadding = convPadding
             self._weightsDepth = tf.compat.v1.get_variable(scope.name+'_weightsDepth', \
-                                                 self._sizeDepthKernel, initializer=convInit, dtype=dtype)
+                                                 self._sizeDepthKernel, initializer=convInit, dtype=dtype, use_resource=False)
             self._weightsPoint = tf.compat.v1.get_variable(scope.name+'_weightsPoint', \
-                                                 self._sizePointKernel, initializer=convInit, dtype=dtype)
+                                                 self._sizePointKernel, initializer=convInit, dtype=dtype, use_resource=False)
             conv = tf.nn.separable_conv2d(input=feature, depthwise_filter=self._weightsDepth, pointwise_filter=self._weightsPoint, \
                                           strides=self._strideConv, padding=self._typeConvPadding, \
                                           name=scope.name+'_sep_conv')
@@ -300,7 +302,7 @@ class SepConv2D(Layer):
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias: 
                 self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels], \
-                                                   initializer=biasInit, dtype=dtype)
+                                                   initializer=biasInit, dtype=dtype, use_resource=False)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
             
@@ -310,13 +312,13 @@ class SepConv2D(Layer):
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
                 self._offset  = tf.compat.v1.get_variable(scope.name+'_offset', \
-                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
-                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -387,7 +389,7 @@ class DepthwiseConv2D(Layer):
             self._strideConv      = [1]+convStride+[1]
             self._typeConvPadding = convPadding
             self._weightsDepth = tf.compat.v1.get_variable(scope.name+'_weightsDepth', \
-                                                 self._sizeDepthKernel, initializer=convInit, dtype=dtype)
+                                                 self._sizeDepthKernel, initializer=convInit, dtype=dtype, use_resource=False)
             conv = tf.nn.depthwise_conv2d(input=feature, filter=self._weightsDepth, strides=self._strideConv, padding=self._typeConvPadding, 
                                           name=scope.name+'_depthwise_conv')
             self._variables.append(self._weightsDepth)
@@ -398,7 +400,7 @@ class DepthwiseConv2D(Layer):
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias: 
                 self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels], \
-                                                   initializer=biasInit, dtype=dtype)
+                                                   initializer=biasInit, dtype=dtype, use_resource=False)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
             
@@ -408,13 +410,13 @@ class DepthwiseConv2D(Layer):
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
                 self._offset  = tf.compat.v1.get_variable(scope.name+'_offset', \
-                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
-                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -503,13 +505,13 @@ class BatchNorm(Layer):
         with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope: 
             shapeParams   = [feature.shape[-1]]
             self._offset  = tf.compat.v1.get_variable(scope.name+'_offset', \
-                                            shapeParams, initializer=ConstInit(0.0), dtype=dtype)
+                                            shapeParams, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
             self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
-                                            shapeParams, initializer=ConstInit(1.0), dtype=dtype)
+                                            shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
             self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                            shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
+                                            shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
             self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                            shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                                            shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
             self._variables.append(self._scale)
             self._variables.append(self._offset)
             self._epsilon   = epsilon
@@ -595,14 +597,14 @@ class FullyConnected(Layer):
         with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope: 
             self._sizeWeights = [feature.get_shape().as_list()[1], outputSize]
             self._weights = tf.compat.v1.get_variable(scope.name+'_weights', \
-                                            self._sizeWeights, initializer=weightInit, dtype=dtype)
+                                            self._sizeWeights, initializer=weightInit, dtype=dtype, use_resource=False)
             self._variables.append(self._weights)
             if wd is not None:
                 decay = tf.multiply(tf.nn.l2_loss(self._weights), wd, name=scope.name+'l2_wd')
                 self._losses.append(decay)
             if bias: 
                 self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [outputSize], \
-                                             initializer=biasInit, dtype=dtype)
+                                             initializer=biasInit, dtype=dtype, use_resource=False)
                 self._variables.append(self._bias)
             else:
                 self._bias = tf.constant(0.0, dtype=dtype)

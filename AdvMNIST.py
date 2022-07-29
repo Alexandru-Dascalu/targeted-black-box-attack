@@ -716,7 +716,7 @@ class NetMNIST(Nets.Net):
 
 if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
-    enemy.load('./ClassifyMNIST/netmnist.ckpt-18300')
+    enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
     net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2) 
     batchTrain, batchTest = MNIST.generatorsAdv(BatchSize=HParamMNIST['BatchSize'], preprocSize=[28, 28, 1])
     net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netmnist.ckpt') # 90 and 94, 87 and 89
