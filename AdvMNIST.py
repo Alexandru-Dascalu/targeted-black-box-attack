@@ -455,19 +455,10 @@ class NetMNIST(Nets.Net):
 
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
-            # self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-            # global_step=self._step, \
-            # decay_steps=self._HParam['DecayAfter']*5, \
-            # decay_rate=0.2) + self._HParam['MinLearningRate']
+            # perhaps this should use an exponential decay rate instead?
             self._lr = tf.Variable(self.hyper_params['LearningRate'], trainable=False)
-            self._lr2 = tf.Variable(self.hyper_params['LearningRate'], trainable=False)
-            # self._lr2 = tf.train.exponential_decay(self._HParam['LearningRate'], \
-            # global_step=self._step, \
-            # decay_steps=self._HParam['DecayAfter'], \
-            # decay_rate=0.5) + self._HParam['MinLearningRate']
-
             self._lrDecay1 = tf.assign(self._lr, self._lr * 0.1)
-            self._lrDecay2 = tf.assign(self._lr2, self._lr2 * 0.1)
+
             self._stepInc = tf.assign(self._step, self._step + 1)
 
             self._varsG = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
@@ -497,12 +488,12 @@ class NetMNIST(Nets.Net):
                     data, _, _ = next(training_data_generator)
                     # get hard label prediction of target model
                     target_model_labels = np.array(self._enemy.infer(data))
-                    loss, accu, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                    loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
                                                    feed_dict={self._images: data, self._labels: target_model_labels})
 
                     print('\rPredictor => Step: ', idx - 300,
                           '; Loss: %.3f' % loss,
-                          '; Accuracy: %.3f' % accu,
+                          '; Accuracy: %.3f' % tfr,
                           end='')
 
                 # test pre-trained model on some test set data
@@ -510,9 +501,9 @@ class NetMNIST(Nets.Net):
                 for idx in range(50):
                     data, _, _ = next(test_data_generator)
                     target_model_labels = np.array(self._enemy.infer(data))
-                    loss, accu, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
+                    loss, tfr, _ = self._sess.run([self._lossSimulator, self._accuracy, self._optimizerS],
                                                    feed_dict={self._images: data, self._labels: target_model_labels})
-                    warmupAccu += accu / 50
+                    warmupAccu += tfr / 50
                 print('\nWarmup Test Accuracy: ', warmupAccu)
 
             self.evaluate(test_data_generator)
@@ -537,7 +528,7 @@ class NetMNIST(Nets.Net):
                     # perform one optimisation step to train simulator so it has the same predictions as the target
                     # model does on normal images with noise
                     target_model_labels = self._enemy.infer(data)
-                    loss, accu, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                    loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
                                                                 self._optimizerS],
                                                                feed_dict={self._images: data,
                                                                           self._labels: target_model_labels})
@@ -549,14 +540,14 @@ class NetMNIST(Nets.Net):
                     # perform one optimisation step to train simulator so it has the same predictions as the target
                     # model does on adversarial images
                     target_model_labels = self._enemy.infer(adversarial_images)
-                    loss, accu, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
+                    loss, tfr, globalStep, _ = self._sess.run([self._lossSimulator, self._accuracy, self._step,
                                                                 self._optimizerS],
                                                                feed_dict={self._images: adversarial_images,
                                                                           self._labels: target_model_labels})
 
                     print('\rPredictor => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
-                          '; Accuracy: %.3f' % accu,
+                          '; Accuracy: %.3f' % tfr,
                           end='')
 
                 # train generator for a couple of steps
@@ -578,13 +569,13 @@ class NetMNIST(Nets.Net):
                                                                              feed_dict={self._images: data,
                                                                                         self._adversarial_targets: target_label})
                     target_model_adversarial_predictions = self._enemy.infer(adversarial_images)
-                    accu = np.mean(target_label == target_model_adversarial_predictions)
-                    fool_rate = np.mean(target_model_labels != target_model_adversarial_predictions)
+                    tfr = np.mean(target_label == target_model_adversarial_predictions)
+                    ufr = np.mean(target_model_labels != target_model_adversarial_predictions)
 
                     print('\rGenerator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
-                          '; Accuracy: %.3f' % accu,
-                          '; Fool Rate: %.3f' % fool_rate,
+                          '; TFR: %.3f' % tfr,
+                          '; UFR: %.3f' % ufr,
                           end='')
 
                 # evaluate on test set data every once in a while
