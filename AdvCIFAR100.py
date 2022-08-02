@@ -552,7 +552,7 @@ class NetCIFAR10(Nets.Net):
                                         feed_dict={self._images: data, \
                                                     self._labels: label, \
                                                 self._targets: target})
-                    print('\rPredictor => Step: ', idx-300, \
+                    print('\rSimulator => Step: ', idx-300, \
                             '; Loss: %.3f'% loss, \
                             '; Accuracy: %.3f'% accu, \
                             end='')
@@ -632,7 +632,7 @@ class NetCIFAR10(Nets.Net):
                                         self._accuracy, self._step, self._optimizerP], \
                                         feed_dict={self._images: data, \
                                                    self._labels: label})
-                    print('\rPredictor => Step: ', globalStep, \
+                    print('\rSimulator => Step: ', globalStep, \
                                 '; Loss: %.3f'% loss, \
                                 '; Accuracy: %.3f'% accu, \
                                 end='')
@@ -654,7 +654,7 @@ class NetCIFAR10(Nets.Net):
                                         feed_dict={self._images: adversary, \
                                                    self._labels: label, \
                                                    self._targets: target})
-                    print('\rPredictor => Step: ', globalStep, \
+                    print('\rSimulator => Step: ', globalStep, \
                                 '; Loss: %.3f'% loss, \
                                 '; Accuracy: %.3f'% accu, \
                                 end='')
@@ -680,8 +680,8 @@ class NetCIFAR10(Nets.Net):
                     
                     print('\rGenerator => Step: ', globalStep, \
                             '; Loss: %.3f'% loss, \
-                            '; Accuracy: %.3f'% accu, \
-                            '; FoolRate: %.3f'% fullrate, \
+                            '; TFR: %.3f'% accu, \
+                            '; UFR: %.3f'% fullrate, \
                             end='')
                 
                 if globalStep % self._HParam['ValidateAfter'] == 0: 
@@ -740,8 +740,8 @@ class NetCIFAR10(Nets.Net):
         totalAccu /= self._HParam['TestSteps']
         totalFullRate /= self._HParam['TestSteps']
         print('\nTest: Loss: ', totalLoss, \
-              '; Accu: ', totalAccu, 
-              '; FullRate: ', totalFullRate)
+              '; TFR: ', totalAccu,
+              '; UFR: ', totalFullRate)
         
     def plot(self, genTest, path=None): 
         if path is not None:

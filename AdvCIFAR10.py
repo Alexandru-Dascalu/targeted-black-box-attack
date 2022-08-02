@@ -541,39 +541,39 @@ class NetCIFAR10(Nets.Net):
             
             # Initialize all
             self._sess.run(tf.compat.v1.global_variables_initializer())
-            
-#            if pathLoad is not None:
-#                self.load(pathLoad)
-#            else:
-#                print('Warming up. ')
-#                for idx in range(300): 
-#                    data, label, target = next(genTrain)
-#                    label = np.array(self._enemy.infer(data))
-#                    loss, accu, _ = \
-#                        self._sess.run([self._lossPredictor, \
-#                                        self._accuracy, self._optimizerP], \
-#                                        feed_dict={self._images: data, \
-#                                                    self._labels: label, \
-#                                                self._targets: target})
-#                    print('\rPredictor => Step: ', idx-300, \
-#                            '; Loss: %.3f'% loss, \
-#                            '; Accuracy: %.3f'% accu, \
-#                            end='')
-#                
-#                warmupAccu = 0.0
-#                for idx in range(50): 
-#                    data, label, target = next(genTest)
-#                    label = np.array(self._enemy.infer(data))
-#                    loss, accu, _ = \
-#                        self._sess.run([self._lossPredictor, \
-#                                        self._accuracy, self._optimizerP], \
-#                                        feed_dict={self._images: data, \
-#                                                    self._labels: label, \
-#                                                self._targets: target})
-#                    warmupAccu += accu / 50
-#                print('\nWarmup Accuracy: ', warmupAccu)
-#            
-                
+
+            if pathLoad is not None:
+                self.load(pathLoad)
+            else:
+                print('Warming up. ')
+                for idx in range(300):
+                    data, label, target = next(genTrain)
+                    label = np.array(self._enemy.infer(data))
+                    loss, accu, _ = \
+                        self._sess.run([self._lossPredictor, \
+                                        self._accuracy, self._optimizerP], \
+                                        feed_dict={self._images: data, \
+                                                    self._labels: label, \
+                                                self._targets: target})
+                    print('\rPredictor => Step: ', idx-300, \
+                            '; Loss: %.3f'% loss, \
+                            '; Accuracy: %.3f'% accu, \
+                            end='')
+
+                warmupAccu = 0.0
+                for idx in range(50):
+                    data, label, target = next(genTest)
+                    label = np.array(self._enemy.infer(data))
+                    loss, accu, _ = \
+                        self._sess.run([self._lossPredictor, \
+                                        self._accuracy, self._optimizerP], \
+                                        feed_dict={self._images: data, \
+                                                    self._labels: label, \
+                                                self._targets: target})
+                    warmupAccu += accu / 50
+                print('\nWarmup Accuracy: ', warmupAccu)
+#
+
             self.evaluate(genTest)
 #             self.sample(genTest)
             
@@ -601,10 +601,9 @@ class NetCIFAR10(Nets.Net):
                                         feed_dict={self._images: data, \
                                                    self._labels: label, \
                                                    self._targets: target})
-                    print('\rPredictor => Step: ', globalStep, \
+                    print('\rSimulator => Step: ', globalStep, \
                                 '; Loss: %.3f'% loss, \
                                 '; Accuracy: %.3f'% accu, \
-                                '; FoolRate: ', \
                                 end='')
                     label = self._enemy.infer(adversary)
                     loss, accu, globalStep, _ = \
@@ -613,10 +612,9 @@ class NetCIFAR10(Nets.Net):
                                         feed_dict={self._images: adversary, \
                                                    self._labels: label, \
                                                    self._targets: target})
-                    print('\rPredictor => Step: ', globalStep, \
+                    print('\rSimulator => Step: ', globalStep, \
                                 '; Loss: %.3f'% loss, \
                                 '; Accuracy: %.3f'% accu, \
-                                '; FoolRate: ', \
                                 end='')
                     
                 for _ in range(self._HParam['NumGenerator']): 
@@ -640,8 +638,8 @@ class NetCIFAR10(Nets.Net):
                     
                     print('\rGenerator => Step: ', globalStep, \
                             '; Loss: %.3f'% loss, \
-                            '; Accuracy: %.3f'% accu, \
-                            '; FoolRate: %.3f'% fullrate, \
+                            '; TFR: %.3f'% accu, \
+                            '; UFR: %.3f'% fullrate, \
                             end='')
                 
                 if globalStep % self._HParam['ValidateAfter'] == 0: 
@@ -700,9 +698,9 @@ class NetCIFAR10(Nets.Net):
         totalAccu /= self._HParam['TestSteps']
         totalFullRate /= self._HParam['TestSteps']
         print('\nTest: Loss: ', totalLoss, \
-              '; Accu: ', totalAccu, 
-              '; FullRate: ', totalFullRate)
-    
+              '; TFR: ', totalAccu,
+              '; UFR: ', totalFullRate)
+
     def sample(self, genTest, path=None):
         if path is not None:
             self.load(path)
