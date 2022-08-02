@@ -715,7 +715,6 @@ class NetMNIST(Nets.Net):
         self._saver.restore(self._sess, path)
 
 if __name__ == '__main__':
-    tf.compat.v1.disable_resource_variables()
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyMNIST/netmnist.ckpt-39901')
