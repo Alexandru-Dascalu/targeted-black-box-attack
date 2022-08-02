@@ -107,10 +107,10 @@ class Conv2D(Layer):
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
                                                 shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype,
-                                                          use_resource=False)
+                                                          use_resource=True)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
                                                 shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype,
-                                                          use_resource=False)
+                                                          use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -210,9 +210,9 @@ class DeConv2D(Layer):
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -316,9 +316,9 @@ class SepConv2D(Layer):
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
@@ -414,9 +414,9 @@ class DepthwiseConv2D(Layer):
                 self._scale   = tf.compat.v1.get_variable(scope.name+'_scale', \
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
                 self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', \
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
                 self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', \
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=False)
+                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon

@@ -715,8 +715,11 @@ class NetMNIST(Nets.Net):
         self._saver.restore(self._sess, path)
 
 if __name__ == '__main__':
+    tf.compat.v1.disable_resource_variables()
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
-    enemy.load('./ClassifyMNIST/netmnist.ckpt-39900')
+    tf.compat.v1.disable_eager_execution()
+    enemy.load('./ClassifyMNIST/netmnist.ckpt-39901')
+    tf.compat.v1.enable_eager_execution()
     net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2) 
     batchTrain, batchTest = MNIST.generatorsAdv(BatchSize=HParamMNIST['BatchSize'], preprocSize=[28, 28, 1])
     net.train(batchTrain, batchTest, pathSave='./AttackMNIST/netmnist.ckpt') # 90 and 94, 87 and 89
