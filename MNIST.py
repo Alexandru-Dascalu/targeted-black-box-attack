@@ -260,7 +260,7 @@ HParamMNIST = {'BatchSize': 200,
                'DecayAfter': 300,
                'ValidateAfter': 300,
                'TestSteps': 50,
-               'TotalSteps': 40000}
+               'TotalSteps': 20000}
 
 class NetMNIST(Nets.Net):
     
