@@ -279,7 +279,7 @@ def SimpleV1(standardized, step, ifTest, layers):
     
     return net
 
-
+# has two fewer layers compared to diagram in paper, misses last two conv 128 layers
 def SimpleV1C(standardized, step, ifTest, layers): 
     net = Layers.Conv2D(standardized, convChannels=64,
                         convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
@@ -724,6 +724,7 @@ def SimpleV3(standardized, step, ifTest, layers):
                            activation=Layers.ReLU,
                            name='SepConv192a', dtype=tf.float32)
     layers.append(net)
+    # why does this not have activation?
     net = Layers.SepConv2D(net.output, convChannels=192,
                            convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                            convInit=Layers.XavierInit, convPadding='SAME',
@@ -744,7 +745,8 @@ def SimpleV3(standardized, step, ifTest, layers):
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='SepConv384Shortcut', dtype=tf.float32)
     layers.append(toadd)
-    
+
+    # why activate this again?
     net = Layers.Activation(added, activation=Layers.ReLU, name='ReLU384')
     layers.append(net)
     net = Layers.SepConv2D(net.output, convChannels=384,
@@ -776,7 +778,8 @@ def SimpleV3(standardized, step, ifTest, layers):
                           poolType=Layers.MaxPool, poolPadding='SAME',
                           name='SepConv768Shortcut', dtype=tf.float32)
     layers.append(toadd)
-    
+
+    # why activate this again?
     net = Layers.Activation(added, activation=Layers.ReLU, name='ReLU768')
     layers.append(net)
     net = Layers.SepConv2D(net.output, convChannels=768,
@@ -797,7 +800,8 @@ def SimpleV3(standardized, step, ifTest, layers):
     layers.append(net)
     
     added = toadd.output + net.output
-    
+
+    # why activate this? both toadd and net had RELU activation
     net = Layers.Activation(added, activation=Layers.ReLU, name='ReLU11024')
     layers.append(net)
     net = Layers.SepConv2D(net.output, convChannels=1024,
@@ -1242,13 +1246,15 @@ def SimpleV6(standardized, step, ifTest, layers):
 
 
 def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
+    # why does this not have activation?
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
                                  biasInit=Layers.ConstInit(0.0),
                                  name='DepthwiseConv3x16', dtype=tf.float32)
     layers.append(net)
-    
+
+    # this layer does not show up in paper diagram
     toconcat = Layers.Conv2D(net.output, convChannels=48,
                              convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
@@ -1396,6 +1402,7 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     layers.append(net)
     
     concated = tf.concat([toconcat.output, net.output], axis=3)
+    # again, this layer does not show up in diagram
     toadd = Layers.Conv2D(concated, convChannels=768,
                           convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
@@ -1435,7 +1442,8 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
                                name='ConvMiddle'+str(idx)+'_3', dtype=tf.float32)
         layers.append(net)
         conved = net.output + conved
-    
+
+    # this skip connection does not show up in paper
     toadd = Layers.Conv2D(conved, convChannels=1536,
                           convKernel=[1, 1], convStride=[1, 1], conv_weight_decay=wd,
                           convInit=Layers.XavierInit, convPadding='SAME',
@@ -1448,7 +1456,8 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
     
     net = Layers.Activation(conved, Layers.ReLU, name='ActExit768_1')
     layers.append(net)
-    
+
+    # this does not show up in diagram in paper
     toconcat = Layers.Conv2D(net.output, convChannels=768,
                              convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                              convInit=Layers.XavierInit, convPadding='SAME',
@@ -1487,7 +1496,8 @@ def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
    
     concated = tf.concat([toconcat.output, net.output], axis=3)
     added = concated + toadd.output
-    
+
+    # does not show up in diagram in paper
     net = Layers.SepConv2D(added, convChannels=2048,
                            convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                            convInit=Layers.XavierInit, convPadding='SAME',

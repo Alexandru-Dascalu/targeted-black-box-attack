@@ -559,6 +559,7 @@ class NetCIFAR10(Nets.Net):
         # Preprocessings
         standardized = self.preproc(images)
         # Body
+        # with SimpleV1C, 15000 steps is enough, after test loss increases. Has 90% test accuracy.
         net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.SimpleV3(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
