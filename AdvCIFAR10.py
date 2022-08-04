@@ -439,7 +439,7 @@ def PredictorG(images, step, ifTest, layers):
     return logits.output
 
 
-HParamCIFAR10 = {'BatchSize': 200, 
+HParamCIFAR10 = {'BatchSize': 128,
                  'NumSubnets': 10, 
                  'NumPredictor': 1, 
                  'NumGenerator': 1, 
@@ -790,7 +790,9 @@ class NetCIFAR10(Nets.Net):
 
 if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
-    enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-23400')
+    tf.compat.v1.disable_eager_execution()
+    enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-59701')
+    tf.compat.v1.enable_eager_execution()
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2) 
     batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     
