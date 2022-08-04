@@ -449,7 +449,7 @@ HParamCIFAR10 = {'BatchSize': 128,
                  'DecayAfter': 300,
                  'ValidateAfter': 300,
                  'TestSteps': 50,
-                 'TotalSteps': 60000}
+                 'TotalSteps': 30000}
 
 class NetCIFAR10(Nets.Net):
     
