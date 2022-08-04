@@ -728,3 +728,5 @@ if __name__ == '__main__':
     
     #NN: Accu:  0.8760999999999997 ; FullRate:  0.8996999999999999
     # 255: Accu:  0.9229999999999997 ; FullRate:  0.9318999999999997
+    
+    # My results after 25000 epochs: TFR:  0.9102 ; UFR:  0.9177999999999997 on test set, better than in the paper!
