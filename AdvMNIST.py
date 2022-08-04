@@ -717,7 +717,7 @@ class NetMNIST(Nets.Net):
 if __name__ == '__main__':
     enemy = MNIST.NetMNIST([28, 28, 1], 2)
     tf.compat.v1.disable_eager_execution()
-    enemy.load('./ClassifyMNIST/netmnist.ckpt-39901')
+    enemy.load('./ClassifyMNIST/netmnist.ckpt-20701')
     tf.compat.v1.enable_eager_execution()
     net = NetMNIST([28, 28, 1], enemy=enemy, numMiddle=2) 
     batchTrain, batchTest = MNIST.generatorsAdv(BatchSize=HParamMNIST['BatchSize'], preprocSize=[28, 28, 1])
