@@ -803,6 +803,9 @@ if __name__ == '__main__':
     net.train(batchTrain, batchTest, pathSave='./AttackCIFAR10/netcifar10.ckpt')
     #net.evaluate(batchTest, './AttackCIFAR10/netcifar10.ckpt-16500')
     #net.sample(batchTest, './AttackCIFAR10/netcifar10.ckpt-6900')
+
+    # Loss:  0.8548992574214935 ; TFR:  0.74890625 ; UFR:  0.86390625 after 30000 steps with SmallNet as target and
+    # SimpleNet as simulator, lower than TFR of 0.843 in paper. Plateaued after 12000 steps.
     
     # Cross Model Attack
     # SimpleV7->SimpleV7; Accu:  0.8017 ; FullRate:  0.8772000000000001
