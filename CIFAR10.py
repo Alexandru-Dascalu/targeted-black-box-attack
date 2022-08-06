@@ -667,6 +667,8 @@ if __name__ == '__main__':
     batchTrain, batchTest = generators(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     net.train(batchTrain, batchTest, pathSave='./ClassifyCIFAR10/netcifar10.ckpt')
     # net.evaluate(batchTest, path='./ClassifyCIFAR10/netcifar10.ckpt-23400')
+
+    # my results: SmallNet 0.89% after 30000 steps
     
     
     # SimpleV1C: 0.9064, 23400

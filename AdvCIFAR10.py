@@ -505,8 +505,8 @@ class NetCIFAR10(Nets.Net):
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
-                self._predictor = PredictorSmallNet(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorSmallNetG(self._adversary, self._step, self._ifTest, self._layers)
+                self._predictor = PredictorSimpleNet(self._images, self._step, self._ifTest, self._layers)
+                self._predictorG = PredictorSimpleNetG(self._adversary, self._step, self._ifTest, self._layers)
             self._inference = self.inference(self._predictor)
             self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0
@@ -634,6 +634,9 @@ class NetCIFAR10(Nets.Net):
                                         feed_dict={self._images: adversary, \
                                                    self._labels: label, \
                                                    self._targets: target})
+
+                    self.simulator_loss_history.append(loss)
+                    self.simulator_accuracy_history.append(accu)
                     print('\rSimulator => Step: ', globalStep, \
                                 '; Loss: %.3f'% loss, \
                                 '; Accuracy: %.3f'% accu, \
@@ -657,7 +660,9 @@ class NetCIFAR10(Nets.Net):
                     results = self._enemy.infer(adversary)
                     accu = np.mean(target==results)
                     fullrate = np.mean(refs!=results)
-                    
+
+                    self.generator_loss_history.append(loss)
+                    self.generator_accuracy_history.append(accu)
                     print('\rGenerator => Step: ', globalStep, \
                             '; Loss: %.3f'% loss, \
                             '; TFR: %.3f'% accu, \
@@ -680,6 +685,10 @@ class NetCIFAR10(Nets.Net):
                     # print(list(zip(label, refs, results, target)))
                     if pathSave is not None:
                         self.save(pathSave)
+                        np.savez("./AttackCIFAR10/training_history", self.simulator_loss_history,
+                                 self.simulator_accuracy_history, self.generator_loss_history,
+                                 self.generator_accuracy_history, self.test_loss_history, self.test_accuracy_history)
+
                     self._sess.run([self._phaseTrain])
                 
                 #if globalStep == 7200 or globalStep == 10200: 
@@ -719,6 +728,9 @@ class NetCIFAR10(Nets.Net):
         totalLoss /= self._HParam['TestSteps']
         totalAccu /= self._HParam['TestSteps']
         totalFullRate /= self._HParam['TestSteps']
+
+        self.test_loss_history.append(totalLoss)
+        self.test_accuracy_history.append(totalAccu)
         print('\nTest: Loss: ', totalLoss, \
               '; TFR: ', totalAccu,
               '; UFR: ', totalFullRate)
@@ -809,13 +821,17 @@ class NetCIFAR10(Nets.Net):
     
     def load(self, path):
         self._saver.restore(self._sess, path)
+        self.load_training_history("./AttackCIFAR10/training_history")
 
 if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
+    net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
+
     tf.compat.v1.disable_eager_execution()
-    enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-59701')
+    enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-29701')
+    net.load("./AttackCIFAR10/netcifar10.ckpt-300")
     tf.compat.v1.enable_eager_execution()
-    net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2) 
+
     batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     
     #while True: 
@@ -823,6 +839,7 @@ if __name__ == '__main__':
         
         
     net.train(batchTrain, batchTest, pathSave='./AttackCIFAR10/netcifar10.ckpt')
+    net.plot_training_history("Adversarial CIFAR10")
     #net.evaluate(batchTest, './AttackCIFAR10/netcifar10.ckpt-16500')
     #net.sample(batchTest, './AttackCIFAR10/netcifar10.ckpt-6900')
 
