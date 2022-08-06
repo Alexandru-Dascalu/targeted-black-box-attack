@@ -498,8 +498,8 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
 HParamCIFAR10 = {'BatchSize': 128,
                   'LearningRate': 1e-3, 
                   'MinLearningRate': 1e-5, 
-                  'DecayAfter': 300,
-                  'ValidateAfter': 3000,
+                  'DecayAfter': 3000,
+                  'ValidateAfter': 300,
                   'TestSteps': 50,
                   'TotalSteps': 30000}
 
