@@ -522,12 +522,12 @@ class NetCIFAR10(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            # self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-            #                                      global_step=self._step, \
-            #                                      decay_steps=self._HParam['DecayAfter'], \
-            #                                      decay_rate=1.0) + self._HParam['MinLearningRate']
-            self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
-            self._lrDecay1 = tf.compat.v1.assign(self._lr, self._lr * 0.1)
+            self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], \
+                                                global_step=self._step, \
+                                                decay_steps=self._HParam['DecayAfter'], \
+                                                decay_rate=0.95) + self._HParam['MinLearningRate']
+            #self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
+            #self._lrDecay1 = tf.compat.v1.assign(self._lr, self._lr * 0.1)
             self._stepInc = tf.compat.v1.assign(self._step, self._step+1)
             self._varsG = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
             self._varsP = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
@@ -660,9 +660,9 @@ class NetCIFAR10(Nets.Net):
                         self.save(pathSave)
                     self._sess.run([self._phaseTrain])
                 
-                if globalStep == 7200 or globalStep == 10200: 
-                    self._sess.run(self._lrDecay1)
-                    print('Learning rate decayed. ')
+                #if globalStep == 7200 or globalStep == 10200: 
+                #    self._sess.run(self._lrDecay1)
+                #    print('Learning rate decayed. ')
                 
     def evaluate(self, genTest, path=None):
         if path is not None:
