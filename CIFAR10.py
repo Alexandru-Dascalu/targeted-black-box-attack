@@ -495,13 +495,13 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
         
     return genTrainBatch(BatchSize), genTestBatch(BatchSize)
 
-HParamCIFAR10 = {'BatchSize': 200, 
+HParamCIFAR10 = {'BatchSize': 128,
                   'LearningRate': 1e-3, 
                   'MinLearningRate': 1e-5, 
                   'DecayAfter': 300,
-                  'ValidateAfter': 300,
+                  'ValidateAfter': 3000,
                   'TestSteps': 50,
-                  'TotalSteps': 60000}
+                  'TotalSteps': 30000}
 
 class NetCIFAR10(Nets.Net):
     
@@ -583,8 +583,8 @@ class NetCIFAR10(Nets.Net):
         with self._graph.as_default(): 
             self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], \
                                                   global_step=self._step, \
-                                                  decay_steps=self._HParam['DecayAfter']*20, \
-                                                  decay_rate=0.10) + self._HParam['MinLearningRate']
+                                                  decay_steps=self._HParam['DecayAfter'], \
+                                                  decay_rate=0.3) + self._HParam['MinLearningRate']
             #self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
             #self._lrDec = tf.assign(self._lr, self._lr*0.1)
             #self._lrInc = tf.assign(self._lr, self._lr*10.0)
