@@ -466,7 +466,7 @@ class NetCIFAR100(Nets.Net):
         # Preprocessings
         standardized = self.preproc(images)
         # Body
-        net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
+        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
         
         class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \

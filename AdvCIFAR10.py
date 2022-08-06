@@ -185,7 +185,7 @@ def Generator(images, targets, numSubnets, step, ifTest, layers):
     
     return noises
 
-def Predictor(images, step, ifTest, layers): 
+def PredictorSimpleNet(images, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(preproc(tf.clip_by_value(images, 0, 255)), convChannels=3*16, \
                         convKernel=[3, 3], convStride=[1, 1], convWD=wd, \
                         convInit=Layers.XavierInit, convPadding='SAME', \
@@ -324,7 +324,7 @@ def Predictor(images, step, ifTest, layers):
     
     return logits.output
 
-def PredictorG(images, step, ifTest, layers): 
+def PredictorSimpleNetG(images, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(preproc(tf.clip_by_value(images, 0, 255)), convChannels=3*16, \
                         convKernel=[3, 3], convStride=[1, 1], convWD=wd, \
                         convInit=Layers.XavierInit, convPadding='SAME', \
@@ -439,6 +439,28 @@ def PredictorG(images, step, ifTest, layers):
     return logits.output
 
 
+def PredictorSmallNet(images, step, ifTest, layers):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    net = Nets.SmallNet(normalised_images, step, ifTest, layers)
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear, reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+    layers.append(logits)
+
+    return logits.output
+
+
+def PredictorSmallNetG(images, step, ifTest, layers):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
+    net = Nets.SmallNet(normalised_images, step, ifTest, [])
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear,
+                                   reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+
+    return logits.output
+
 HParamCIFAR10 = {'BatchSize': 128,
                  'NumSubnets': 10, 
                  'NumPredictor': 1, 
@@ -483,8 +505,8 @@ class NetCIFAR10(Nets.Net):
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
-                self._predictor = Predictor(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorG(self._adversary, self._step, self._ifTest, self._layers)
+                self._predictor = PredictorSmallNet(self._images, self._step, self._ifTest, self._layers)
+                self._predictorG = PredictorSmallNetG(self._adversary, self._step, self._ifTest, self._layers)
             self._inference = self.inference(self._predictor)
             self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0

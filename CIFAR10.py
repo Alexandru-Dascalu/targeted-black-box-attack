@@ -558,7 +558,7 @@ class NetCIFAR10(Nets.Net):
         # Preprocessings
         standardized = self.preproc(images)
         # Body
-        net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
+        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.SimpleV3(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
         #net = Nets.SimpleV7(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)

@@ -316,7 +316,7 @@ class NetMNIST(Nets.Net):
         # Preprocessings
         standardized = self.preproc(images)
         # Body
-        net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
+        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
         
         class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4, \
                                     biasInit=Layers.ConstInit(0.0), \
