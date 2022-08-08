@@ -825,13 +825,11 @@ class NetCIFAR10(Nets.Net):
 
 if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
-    net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
-
     tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-29701')
-    net.load("./AttackCIFAR10/netcifar10.ckpt-300")
     tf.compat.v1.enable_eager_execution()
 
+    net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
     batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     
     #while True: 
