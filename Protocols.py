@@ -51,19 +51,31 @@ class Net:
     def plot_training_history(self, model):
         plt.plot(self.simulator_loss_history, label="Simulator")
         plt.plot(self.generator_loss_history, label="Generator")
-        plt.plot(self.test_loss_history, label="Test")
         plt.xlabel("Steps")
         plt.ylabel("Loss")
         plt.title("{} loss history".format(model))
         plt.legend()
         plt.show()
 
+        plt.plot(self.test_loss_history, label="Test")
+        plt.xlabel("Steps")
+        plt.ylabel("Loss")
+        plt.title("{} test loss history".format(model))
+        plt.legend()
+        plt.show()
+
         plt.plot(self.simulator_accuracy_history, label="Simulator")
         plt.plot(self.generator_accuracy_history, label="Generator")
-        plt.plot(self.test_accuracy_history, label="Test")
         plt.xlabel("Steps")
         plt.ylabel("TFR")
         plt.title("{} TFR history".format(model))
+        plt.legend()
+        plt.show()
+
+        plt.plot(self.test_accuracy_history, label="Test")
+        plt.xlabel("Steps")
+        plt.ylabel("TFR")
+        plt.title("{} test TFR history".format(model))
         plt.legend()
         plt.show()
     
