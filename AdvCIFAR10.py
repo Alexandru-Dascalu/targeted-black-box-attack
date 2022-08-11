@@ -846,6 +846,8 @@ if __name__ == '__main__':
     # Loss:  0.542461564540863 ; TFR:  0.8415625 ; UFR:  0.91078125 after 27000 steps with SmallNet as target and
     # SimpleNet as simulator, almost the same as in the paper, after using exponential learning rate decay! Hit 0.82
     # TFR after 19200 steps, and then increased very slowly.
+    # Loss:  0.6553342294692993; TFR: 0.80203125; UFR: 0.89640625 after 30000 steps with SmallNet as both simulator and
+    # target, under tfr of 0.85 as in paper
     
     # Cross Model Attack
     # SimpleV7->SimpleV7; Accu:  0.8017 ; FullRate:  0.8772000000000001
