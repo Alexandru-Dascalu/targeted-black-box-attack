@@ -467,7 +467,7 @@ HParamCIFAR10 = {'BatchSize': 128,
                  'NumGenerator': 1, 
                  'NoiseDecay': 1e-5, 
                  'LearningRate': 1e-3, 
-                 'MinLearningRate': 1e-5, 
+                 'MinLearningRate': 2 * 1e-5, 
                  'DecayAfter': 300,
                  'ValidateAfter': 300,
                  'TestSteps': 50,
@@ -505,8 +505,8 @@ class NetCIFAR10(Nets.Net):
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
-                self._predictor = PredictorSimpleNet(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorSimpleNetG(self._adversary, self._step, self._ifTest, self._layers)
+                self._predictor = PredictorSmallNet(self._images, self._step, self._ifTest, self._layers)
+                self._predictorG = PredictorSmallNetG(self._adversary, self._step, self._ifTest, self._layers)
             self._inference = self.inference(self._predictor)
             self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0
@@ -824,12 +824,17 @@ class NetCIFAR10(Nets.Net):
         self.load_training_history("./AttackCIFAR10/training_history")
 
 if __name__ == '__main__':
+    #tf.compat.v1.experimental.output_all_intermediates(True)
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
     tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-29701')
     tf.compat.v1.enable_eager_execution()
 
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
+    #tf.compat.v1.disable_eager_execution()
+    #net.load('./AttackCIFAR10/netcifar10.ckpt-9300')
+    #tf.compat.v1.enable_eager_execution()
+    
     batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     
     #while True: 
