@@ -456,10 +456,32 @@ def PredictorSmallNet(images, step, ifTest, layers):
     return logits.output
 
 
-def PredictorSmallNetG(images, step, ifTest, layers):
+def PredictorSmallNetG(images, step, ifTest):
     normalised_images = preproc(tf.clip_by_value(images, 0, 255))
     # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
     net = Nets.SmallNet(normalised_images, step, ifTest, [])
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear,
+                                   reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+
+    return logits.output
+
+def PredictorConcatNet(images, step, ifTest, layers):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    net = Nets.ConcatNet(normalised_images, step, ifTest, layers)
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear, reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+    layers.append(logits)
+
+    return logits.output
+
+
+def PredictorConcatNetG(images, step, ifTest):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
+    net = Nets.ConcatNet(normalised_images, step, ifTest, [])
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
                                    biasInit=Layers.ConstInit(0.0), activation=Layers.Linear,
                                    reuse=tf.compat.v1.AUTO_REUSE,
@@ -511,8 +533,8 @@ class NetCIFAR10(Nets.Net):
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
-                self._predictor = PredictorSmallNet(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorSmallNetG(self._adversary, self._step, self._ifTest, self._layers)
+                self._predictor = PredictorConcatNet(self._images, self._step, self._ifTest, self._layers)
+                self._predictorG = PredictorConcatNetG(self._adversary, self._step, self._ifTest)
             self._inference = self.inference(self._predictor)
             self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0
