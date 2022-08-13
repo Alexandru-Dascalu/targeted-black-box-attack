@@ -1,6 +1,12 @@
 import random
 import numpy as np
 import tensorflow as tf
+gpu = tf.config.list_physical_devices('GPU')[0]
+tf.config.experimental.set_memory_growth(gpu, True)
+tf.config.set_logical_device_configuration(
+    gpu,
+    [tf.config.LogicalDeviceConfiguration(memory_limit=7000)])
+    
 import matplotlib.pyplot as plt
 
 import Layers
@@ -461,7 +467,7 @@ def PredictorSmallNetG(images, step, ifTest, layers):
 
     return logits.output
 
-HParamCIFAR10 = {'BatchSize': 128,
+HParamCIFAR10 = {'BatchSize': 200,
                  'NumSubnets': 10, 
                  'NumPredictor': 1, 
                  'NumGenerator': 1, 
@@ -851,8 +857,11 @@ if __name__ == '__main__':
     # Loss:  0.542461564540863 ; TFR:  0.8415625 ; UFR:  0.91078125 after 27000 steps with SmallNet as target and
     # SimpleNet as simulator, almost the same as in the paper, after using exponential learning rate decay! Hit 0.82
     # TFR after 19200 steps, and then increased very slowly.
-    # Loss:  0.6553342294692993; TFR: 0.80203125; UFR: 0.89640625 after 30000 steps with SmallNet as both simulator and
-    # target, under tfr of 0.85 as in paper
+    
+    # SmallNet as both simulator and target:
+    # Loss:  0.6553342294692993; TFR: 0.80203125; UFR: 0.89640625 after 30000
+    # Loss:  0.5618793880939483 ; TFR:  0.8396875 ; UFR:  0.91234375, with decay rate 0.95 and min learning step of 2 * 10^-5, close to 0.85 result in paper.
+    # Test: Loss:  0.5125626558065415 ; TFR:  0.8568000000000001 ; UFR:  0.9262999999999999 after 30000 steps with decay rate 0.95, min learning rate 2 * 10^-5 and batch 200
     
     # Cross Model Attack
     # SimpleV7->SimpleV7; Accu:  0.8017 ; FullRate:  0.8772000000000001
