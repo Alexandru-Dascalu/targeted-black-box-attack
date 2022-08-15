@@ -629,6 +629,9 @@ class AdvNetCIFAR10(Nets.Net):
                                                                     self._optimizerS],
                                                                    feed_dict={self._images: adversarial_images,
                                                                               self._labels: target_model_labels})
+
+                    self.simulator_loss_history.append(loss)
+                    self.simulator_accuracy_history.append(accuracy)
                     print('\rSimulator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
                           '; Accuracy: %.3f' % accuracy,
@@ -656,6 +659,8 @@ class AdvNetCIFAR10(Nets.Net):
                     tfr = np.mean(target_label == adversarial_predictions)
                     ufr = np.mean(target_model_labels != adversarial_predictions)
 
+                    self.generator_loss_history.append(loss)
+                    self.generator_accuracy_history.append(tfr)
                     print('\rGenerator => Step: ', globalStep,
                           '; Loss: %.3f' % loss,
                           '; TFR: %.3f' % tfr,
@@ -667,6 +672,10 @@ class AdvNetCIFAR10(Nets.Net):
                     self.evaluate(test_data_generator)
                     if path_save is not None:
                         self.save(path_save)
+                        np.savez("./AttackCIFAR10/training_history", self.simulator_loss_history,
+                                 self.simulator_accuracy_history, self.generator_loss_history,
+                                 self.generator_accuracy_history, self.test_loss_history, self.test_accuracy_history)
+
                     self._sess.run([self._phaseTrain])
 
     def evaluate(self, test_data_generator, path=None):
@@ -707,6 +716,9 @@ class AdvNetCIFAR10(Nets.Net):
         total_loss /= self._hyper_params['TestSteps']
         total_tfr /= self._hyper_params['TestSteps']
         total_ufr /= self._hyper_params['TestSteps']
+
+        self.test_loss_history.append(total_loss)
+        self.test_accuracy_history.append(total_tfr)
         print('\nTest: Loss: ', total_loss,
               '; TFR: ', total_tfr,
               '; UFR: ', total_ufr)
@@ -794,9 +806,6 @@ class AdvNetCIFAR10(Nets.Net):
     def save(self, path):
         self._saver.save(self._sess, path, global_step=self._step)
 
-    def load(self, path):
-        self._saver.restore(self._sess, path)
-
 
 if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
@@ -812,6 +821,7 @@ if __name__ == '__main__':
     #    net.plot(batchTest, './AttackCIFAR10/netcifar10.ckpt-18600')
 
     net.train(batchTrain, batchTest, path_save='./AttackCIFAR10/netcifar10.ckpt')
+    net.plot_training_history("Adversarial CIFAR10")
     # net.evaluate(batchTest, './AttackCIFAR10/netcifar10.ckpt-16500')
     # net.sample(batchTest, './AttackCIFAR10/netcifar10.ckpt-6900')
 
