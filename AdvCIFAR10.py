@@ -794,7 +794,7 @@ if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
     enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-23400')
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2) 
-    batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
+    batchTrain, batchTest = CIFAR10.get_adversarial_data_generators(batch_size=HParamCIFAR10['BatchSize'], image_size=[32, 32, 3])
     
     #while True: 
     #    net.plot(batchTest, './AttackCIFAR10/netcifar10.ckpt-18600')
