@@ -472,12 +472,14 @@ class AdvNetCIFAR10(Nets.Net):
             self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
 
             # Inputs
-            self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[self._hyper_params['BatchSize']] + image_shape,
-                                          name='CIFAR10_images')
+            self._images = tf.compat.v1.placeholder(dtype=tf.float32,
+                                                    shape=[self._hyper_params['BatchSize']] + image_shape,
+                                                    name='CIFAR10_images')
             self._labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
-                                          name='CIFAR10_labels')
-            self._adversarial_targets = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
-                                                       name='CIFAR10_targets')
+                                                    name='CIFAR10_labels')
+            self._adversarial_targets = tf.compat.v1.placeholder(dtype=tf.int64,
+                                                                 shape=[self._hyper_params['BatchSize']],
+                                                                 name='CIFAR10_targets')
 
             # define generator
             with tf.compat.v1.variable_scope('Generator', reuse=tf.compat.v1.AUTO_REUSE) as scope:
@@ -515,8 +517,10 @@ class AdvNetCIFAR10(Nets.Net):
             # simulator loss matches simulator output against output of target model
             self._loss_simulator = self.loss(self._simulator, self._labels, name='lossP') + self._loss
             # generator trains to produce perturbations that make the simulator produce the desired target labels
-            self._loss_generator = self.loss(self._simulatorG, self._adversarial_targets, name='lossG') + \
-                                   self._hyper_params['NoiseDecay'] * tf.reduce_mean(input_tensor=tf.norm(tensor=self._noises)) + self._loss
+            self._loss_generator = self.loss(self._simulatorG, self._adversarial_targets, name='lossG')
+            self._loss_generator += self._hyper_params['NoiseDecay'] * tf.reduce_mean(
+                input_tensor=tf.norm(tensor=self._noises)) + self._loss
+
             print(self.summary)
             print("\n Begin Training: \n")
 
@@ -534,9 +538,9 @@ class AdvNetCIFAR10(Nets.Net):
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
             self._lr = tf.compat.v1.train.exponential_decay(self._hyper_params['LearningRate'],
-                                                  global_step=self._step,
-                                                  decay_steps=self._hyper_params['DecayAfter'],
-                                                  decay_rate=self._hyper_params['DecayRate'])
+                                                            global_step=self._step,
+                                                            decay_steps=self._hyper_params['DecayAfter'],
+                                                            decay_rate=self._hyper_params['DecayRate'])
             self._lr += self._hyper_params['MinLearningRate']
 
             self._stepInc = tf.compat.v1.assign(self._step, self._step + 1)
@@ -546,7 +550,7 @@ class AdvNetCIFAR10(Nets.Net):
 
             # define optimisers
             self._optimizerS = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss_simulator,
-                                                                                       var_list=self._varsS)
+                                                                                                 var_list=self._varsS)
             self._optimizerG = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8)
             # clip generator optimiser gradients
             gradientsG = self._optimizerG.compute_gradients(self._loss_generator, var_list=self._varsG)
