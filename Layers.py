@@ -4,12 +4,12 @@ import tensorflow as tf
 from tensorflow.python.training.moving_averages import assign_moving_average
 
 # Initializers
-XavierInit = tf.contrib.layers.xavier_initializer()
-Norm01Init = tf.truncated_normal_initializer(0.0, stddev=0.1)
+XavierInit = tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform")
+Norm01Init = tf.compat.v1.truncated_normal_initializer(0.0, stddev=0.1)
 def NormalInit(stddev, dtype=tf.float32):
-    return tf.truncated_normal_initializer(0.0, stddev=stddev, dtype=dtype)
+    return tf.compat.v1.truncated_normal_initializer(0.0, stddev=stddev, dtype=dtype)
 def ConstInit(const, dtype=tf.float32):
-    return tf.constant_initializer(const, dtype=dtype)
+    return tf.compat.v1.constant_initializer(const, dtype=dtype)
 
 # Activations
 Linear = tf.identity
@@ -24,8 +24,8 @@ def LeakyReLU(alpha=0.2):
     return functools.partial(tf.nn.leaky_relu, alpha=alpha)
 
 # Poolings
-AvgPool = tf.nn.avg_pool
-MaxPool = tf.nn.max_pool
+AvgPool = tf.nn.avg_pool2d
+MaxPool = tf.nn.max_pool2d
 
 
 class Layer(object):
@@ -77,13 +77,13 @@ class Conv2D(Layer):
         Layer.__init__(self)
         self._name = name
         self._losses = []
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._sizeKernel = convKernel + [feature.get_shape().as_list()[3], convChannels]
             self._strideConv = [1]+convStride+[1]
             self._typeConvPadding = convPadding
-            self._weights = tf.get_variable(scope.name+'_weights',
+            self._weights = tf.compat.v1.get_variable(scope.name+'_weights',
                                             self._sizeKernel, initializer=convInit, dtype=dtype)
-            conv = tf.nn.conv2d(feature, self._weights, self._strideConv, padding=self._typeConvPadding,
+            conv = tf.nn.conv2d(input=feature, filters=self._weights, strides=self._strideConv, padding=self._typeConvPadding,
                                 name=scope.name+'_conv2d')
             self._variables.append(self._weights)
             if conv_weight_decay is not None:
@@ -92,7 +92,7 @@ class Conv2D(Layer):
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias:
-                self._bias = tf.get_variable(scope.name+'_bias', [convChannels],
+                self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels],
                                              initializer=biasInit, dtype=dtype)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
@@ -102,26 +102,26 @@ class Conv2D(Layer):
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
-                self._offset  = tf.get_variable(scope.name+'_offset',
+                self._offset  = tf.compat.v1.get_variable(scope.name+'_offset',
                                                 shapeParams, initializer=ConstInit(0.0), dtype=dtype)
-                self._scale   = tf.get_variable(scope.name+'_scale',
+                self._scale   = tf.compat.v1.get_variable(scope.name+'_scale',
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype)
-                self._movMean = tf.get_variable(scope.name+'_movMean',
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
-                self._movVar  = tf.get_variable(scope.name+'_movVar',
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', shapeParams, trainable=False,
+                                                          initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
+                self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', shapeParams, trainable=False,
+                                                          initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
                 def trainMeanVar():
-                    mean, var = tf.nn.moments(conv, list(range(len(conv.shape)-1)))
+                    mean, var = tf.nn.moments(x=conv, axes=list(range(len(conv.shape)-1)))
                     with tf.control_dependencies([assign_moving_average(self._movMean, mean, 0.9),
                                                   assign_moving_average(self._movVar, var, 0.9)]):
                         self._trainMean = tf.identity(mean)
                         self._trainVar  = tf.identity(var)
                     return self._trainMean, self._trainVar
 
-                self._actualMean, self._actualVar = tf.cond(ifTest, lambda: (self._movMean, self._movVar), trainMeanVar)
+                self._actualMean, self._actualVar = tf.cond(pred=ifTest, true_fn=lambda: (self._movMean, self._movVar), false_fn=trainMeanVar)
                 conv = tf.nn.batch_normalization(conv, self._actualMean, self._actualVar,
                                                  self._offset, self._scale, self._epsilon,
                                                  name=scope.name+'_batch_normalization')
@@ -175,7 +175,7 @@ class DeConv2D(Layer):
         Layer.__init__(self);
         self._name = name
         self._losses = []
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._sizeKernel      = convKernel + [convChannels, feature.get_shape().as_list()[3]]
             self._strideConv      = [1]+convStride+[1]
             if shapeOutput is None:
@@ -183,7 +183,7 @@ class DeConv2D(Layer):
             else:
                 self._shapeOutput = tf.TensorShape([feature.shape[0]] + shapeOutput + [convChannels])
             self._typeConvPadding = convPadding
-            self._weights = tf.get_variable(scope.name+'_weights',
+            self._weights = tf.compat.v1.get_variable(scope.name+'_weights',
                                             self._sizeKernel, initializer=convInit, dtype=dtype)
             conv = tf.nn.conv2d_transpose(feature, self._weights, self._shapeOutput, self._strideConv, padding=self._typeConvPadding,
                                           name=scope.name+'_conv2d_transpose')
@@ -194,7 +194,7 @@ class DeConv2D(Layer):
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias:
-                self._bias = tf.get_variable(scope.name+'_bias', [convChannels],
+                self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels],
                                              initializer=biasInit, dtype=dtype)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
@@ -204,26 +204,26 @@ class DeConv2D(Layer):
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
-                self._offset  = tf.get_variable(scope.name+'_offset',
+                self._offset  = tf.compat.v1.get_variable(scope.name+'_offset',
                                                 shapeParams, initializer=ConstInit(0.0), dtype=dtype)
-                self._scale   = tf.get_variable(scope.name+'_scale',
+                self._scale   = tf.compat.v1.get_variable(scope.name+'_scale',
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype)
-                self._movMean = tf.get_variable(scope.name+'_movMean',
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
-                self._movVar  = tf.get_variable(scope.name+'_movVar',
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', shapeParams, trainable=False,
+                                                          initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
+                self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', shapeParams, trainable=False,
+                                                          initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
                 def trainMeanVar():
-                    mean, var = tf.nn.moments(conv, list(range(len(conv.shape)-1)))
+                    mean, var = tf.nn.moments(x=conv, axes=list(range(len(conv.shape)-1)))
                     with tf.control_dependencies([assign_moving_average(self._movMean, mean, 0.9),
                                                   assign_moving_average(self._movVar, var, 0.9)]):
                         self._trainMean = tf.identity(mean)
                         self._trainVar  = tf.identity(var)
                     return self._trainMean, self._trainVar
 
-                self._actualMean, self._actualVar = tf.cond(ifTest, lambda: (self._movMean, self._movVar), trainMeanVar)
+                self._actualMean, self._actualVar = tf.cond(pred=ifTest, true_fn=lambda: (self._movMean, self._movVar), false_fn=trainMeanVar)
                 conv = tf.nn.batch_normalization(conv, self._actualMean, self._actualVar,
                                                  self._offset, self._scale, self._epsilon,
                                                  name=scope.name+'_batch_normalization')
@@ -278,16 +278,16 @@ class SepConv2D(Layer):
         Layer.__init__(self);
         self._name = name
         self._losses = []
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._sizeDepthKernel = convKernel + [feature.get_shape().as_list()[3], 1]
             self._sizePointKernel = [1, 1] + [feature.get_shape().as_list()[3], convChannels]
             self._strideConv      = [1]+convStride+[1]
             self._typeConvPadding = convPadding
-            self._weightsDepth = tf.get_variable(scope.name+'_weightsDepth',
+            self._weightsDepth = tf.compat.v1.get_variable(scope.name+'_weightsDepth',
                                                  self._sizeDepthKernel, initializer=convInit, dtype=dtype)
-            self._weightsPoint = tf.get_variable(scope.name+'_weightsPoint',
+            self._weightsPoint = tf.compat.v1.get_variable(scope.name+'_weightsPoint',
                                                  self._sizePointKernel, initializer=convInit, dtype=dtype)
-            conv = tf.nn.separable_conv2d(feature, self._weightsDepth, self._weightsPoint,
+            conv = tf.nn.separable_conv2d(input=feature, depthwise_filter=self._weightsDepth, pointwise_filter=self._weightsPoint,
                                           strides=self._strideConv, padding=self._typeConvPadding,
                                           name=scope.name+'_sep_conv')
             self._variables.append(self._weightsDepth)
@@ -300,7 +300,7 @@ class SepConv2D(Layer):
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias:
-                self._bias = tf.get_variable(scope.name+'_bias', [convChannels],
+                self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels],
                                              initializer=biasInit, dtype=dtype)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
@@ -310,26 +310,26 @@ class SepConv2D(Layer):
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
-                self._offset  = tf.get_variable(scope.name+'_offset',
+                self._offset  = tf.compat.v1.get_variable(scope.name+'_offset',
                                                 shapeParams, initializer=ConstInit(0.0), dtype=dtype)
-                self._scale   = tf.get_variable(scope.name+'_scale',
+                self._scale   = tf.compat.v1.get_variable(scope.name+'_scale',
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype)
-                self._movMean = tf.get_variable(scope.name+'_movMean',
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
-                self._movVar  = tf.get_variable(scope.name+'_movVar',
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', shapeParams, trainable=False,
+                                                          initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
+                self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', shapeParams, trainable=False,
+                                                          initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
                 def trainMeanVar():
-                    mean, var = tf.nn.moments(conv, list(range(len(conv.shape)-1)))
+                    mean, var = tf.nn.moments(x=conv, axes=list(range(len(conv.shape)-1)))
                     with tf.control_dependencies([assign_moving_average(self._movMean, mean, 0.9),
                                                   assign_moving_average(self._movVar, var, 0.9)]):
                         self._trainMean = tf.identity(mean)
                         self._trainVar  = tf.identity(var)
                     return self._trainMean, self._trainVar
 
-                self._actualMean, self._actualVar = tf.cond(ifTest, lambda: (self._movMean, self._movVar), trainMeanVar)
+                self._actualMean, self._actualVar = tf.cond(pred=ifTest, true_fn=lambda: (self._movMean, self._movVar), false_fn=trainMeanVar)
                 conv = tf.nn.batch_normalization(conv, self._actualMean, self._actualVar,
                                                  self._offset, self._scale, self._epsilon,
                                                  name=scope.name+'_batch_normalization')
@@ -384,13 +384,13 @@ class DepthwiseConv2D(Layer):
         Layer.__init__(self);
         self._name = name
         self._losses = []
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._sizeDepthKernel = convKernel + [feature.get_shape().as_list()[3], int(convChannels/feature.get_shape().as_list()[3])]
             self._strideConv      = [1]+convStride+[1]
             self._typeConvPadding = convPadding
-            self._weightsDepth = tf.get_variable(scope.name+'_weightsDepth',
+            self._weightsDepth = tf.compat.v1.get_variable(scope.name+'_weightsDepth',
                                                  self._sizeDepthKernel, initializer=convInit, dtype=dtype)
-            conv = tf.nn.depthwise_conv2d(feature, self._weightsDepth, strides=self._strideConv, padding=self._typeConvPadding,
+            conv = tf.nn.depthwise_conv2d(input=feature, filter=self._weightsDepth, strides=self._strideConv, padding=self._typeConvPadding,
                                           name=scope.name+'_depthwise_conv')
             self._variables.append(self._weightsDepth)
             if convWD is not None:
@@ -399,7 +399,7 @@ class DepthwiseConv2D(Layer):
 
             #tf.nn.conv2d(pooling, kernel, [1, 1, 1, 1], padding=Padding)
             if bias:
-                self._bias = tf.get_variable(scope.name+'_bias', [convChannels],
+                self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [convChannels],
                                              initializer=biasInit, dtype=dtype)
                 conv = conv + self._bias
                 self._variables.append(self._bias)
@@ -409,26 +409,26 @@ class DepthwiseConv2D(Layer):
                 assert (step is not None), "step parameter must not be None. "
                 assert (ifTest is not None), "ifTest parameter must not be None. "
                 shapeParams   = [conv.shape[-1]]
-                self._offset  = tf.get_variable(scope.name+'_offset',
+                self._offset  = tf.compat.v1.get_variable(scope.name+'_offset',
                                                 shapeParams, initializer=ConstInit(0.0), dtype=dtype)
-                self._scale   = tf.get_variable(scope.name+'_scale',
+                self._scale   = tf.compat.v1.get_variable(scope.name+'_scale',
                                                 shapeParams, initializer=ConstInit(1.0), dtype=dtype)
-                self._movMean = tf.get_variable(scope.name+'_movMean',
-                                                shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
-                self._movVar  = tf.get_variable(scope.name+'_movVar',
-                                                shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+                self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', shapeParams, trainable=False,
+                                                          initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
+                self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', shapeParams, trainable=False,
+                                                          initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
                 self._variables.append(self._scale)
                 self._variables.append(self._offset)
                 self._epsilon   = epsilon
                 def trainMeanVar():
-                    mean, var = tf.nn.moments(conv, list(range(len(conv.shape)-1)))
+                    mean, var = tf.nn.moments(x=conv, axes=list(range(len(conv.shape)-1)))
                     with tf.control_dependencies([assign_moving_average(self._movMean, mean, 0.9),
                                                   assign_moving_average(self._movVar, var, 0.9)]):
                         self._trainMean = tf.identity(mean)
                         self._trainVar  = tf.identity(var)
                     return self._trainMean, self._trainVar
 
-                self._actualMean, self._actualVar = tf.cond(ifTest, lambda: (self._movMean, self._movVar), trainMeanVar)
+                self._actualMean, self._actualVar = tf.cond(pred=ifTest, true_fn=lambda: (self._movMean, self._movVar), false_fn=trainMeanVar)
                 conv = tf.nn.batch_normalization(conv, self._actualMean, self._actualVar,
                                                  self._offset, self._scale, self._epsilon,
                                                  name=scope.name+'_batch_normalization')
@@ -481,7 +481,7 @@ class LRNorm(Layer):
         self._bias        = bias
         self._alpha       = alpha
         self._beta        = beta
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._output = tf.nn.lrn(feature, depth_radius=depth_radius, bias=bias, alpha=alpha, beta=beta,
                                      name=scope.name)
 
@@ -502,28 +502,28 @@ class BatchNorm(Layer):
 
         Layer.__init__(self);
         self._name = name
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             shapeParams   = [feature.shape[-1]]
-            self._offset  = tf.get_variable(scope.name+'_offset',
+            self._offset  = tf.compat.v1.get_variable(scope.name+'_offset',
                                             shapeParams, initializer=ConstInit(0.0), dtype=dtype)
-            self._scale   = tf.get_variable(scope.name+'_scale',
+            self._scale   = tf.compat.v1.get_variable(scope.name+'_scale',
                                             shapeParams, initializer=ConstInit(1.0), dtype=dtype)
-            self._movMean = tf.get_variable(scope.name+'_movMean',
-                                            shapeParams, trainable=False, initializer=ConstInit(0.0), dtype=dtype)
-            self._movVar  = tf.get_variable(scope.name+'_movVar',
-                                            shapeParams, trainable=False, initializer=ConstInit(1.0), dtype=dtype)
+            self._movMean = tf.compat.v1.get_variable(scope.name+'_movMean', shapeParams, trainable=False,
+                                                      initializer=ConstInit(0.0), dtype=dtype, use_resource=True)
+            self._movVar  = tf.compat.v1.get_variable(scope.name+'_movVar', shapeParams, trainable=False,
+                                                      initializer=ConstInit(1.0), dtype=dtype, use_resource=True)
             self._variables.append(self._scale)
             self._variables.append(self._offset)
             self._epsilon   = epsilon
             def trainMeanVar():
-                mean, var = tf.nn.moments(feature, list(range(len(feature.shape)-1)))
+                mean, var = tf.nn.moments(x=feature, axes=list(range(len(feature.shape)-1)))
                 with tf.control_dependencies([assign_moving_average(self._movMean, mean, 0.9),
                                               assign_moving_average(self._movVar, var, 0.9)]):
                     self._trainMean = tf.identity(mean)
                     self._trainVar  = tf.identity(var)
                 return self._trainMean, self._trainVar
 
-            self._actualMean, self._actualVar = tf.cond(ifTest, lambda: (self._movMean, self._movVar), trainMeanVar)
+            self._actualMean, self._actualVar = tf.cond(pred=ifTest, true_fn=lambda: (self._movMean, self._movVar), false_fn=trainMeanVar)
             self._output = tf.nn.batch_normalization(feature, self._actualMean, self._actualVar,
                                                      self._offset, self._scale, self._epsilon,
                                                      name=scope.name+'_batch_normalization')
@@ -545,14 +545,14 @@ class Dropout(Layer):
         Layer.__init__(self);
         self._name = name
         self._rateKeep = rateKeep
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._keepProb = tf.Variable(rateKeep, trainable=False)
             def phaseTest():
-                return tf.assign(self._keepProb, 1.0)
+                return tf.compat.v1.assign(self._keepProb, 1.0)
             def phaseTrain():
-                return tf.assign(self._keepProb, rateKeep)
-            with tf.control_dependencies([tf.cond(ifTest, phaseTest, phaseTrain)]):
-                self._output = tf.nn.dropout(feature, self._keepProb, name=scope.name+'_dropout')
+                return tf.compat.v1.assign(self._keepProb, rateKeep)
+            with tf.control_dependencies([tf.cond(pred=ifTest, true_fn=phaseTest, false_fn=phaseTrain)]):
+                self._output = tf.nn.dropout(feature, 1 - (self._keepProb), name=scope.name+'_dropout')
 
     @property
     def type(self):
@@ -596,16 +596,16 @@ class FullyConnected(Layer):
 
         Layer.__init__(self)
         self._name = name
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._sizeWeights = [feature.get_shape().as_list()[1], outputSize]
-            self._weights = tf.get_variable(scope.name+'_weights',
+            self._weights = tf.compat.v1.get_variable(scope.name+'_weights',
                                             self._sizeWeights, initializer=weightInit, dtype=dtype)
             self._variables.append(self._weights)
             if wd is not None:
                 decay = tf.multiply(tf.nn.l2_loss(self._weights), wd, name=scope.name+'l2_wd')
                 self._losses.append(decay)
             if bias:
-                self._bias = tf.get_variable(scope.name+'_bias', [outputSize],
+                self._bias = tf.compat.v1.get_variable(scope.name+'_bias', [outputSize],
                                              initializer=biasInit, dtype=dtype)
                 self._variables.append(self._bias)
             else:
@@ -640,7 +640,7 @@ class Activation(Layer):
         Layer.__init__(self);
         self._name = name
         self._activation = activation
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._output = activation(feature, name=scope.name+'_activation')
 
     @property
@@ -667,7 +667,7 @@ class Pooling(Layer):
         self._sizePooling     = [1]+size+[1]
         self._stridePooling   = [1]+stride+[1]
         self._typePoolPadding = padding
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._output = self._typePool(feature, ksize=self._sizePooling, strides=self._stridePooling,
                                           padding=self._typePoolPadding,
                                           name=scope.name+'_pooling')
@@ -692,8 +692,8 @@ class GlobalAvgPool(Layer):
 
         Layer.__init__(self);
         self._name = name
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
-            self._output = tf.reduce_mean(feature, [1, 2], name=scope.name+'_global_avg_pool')
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
+            self._output = tf.reduce_mean(input_tensor=feature, axis=[1, 2], name=scope.name+'_global_avg_pool')
 
     @property
     def type(self):
@@ -712,10 +712,10 @@ class CrossEntropy(Layer):
 
         Layer.__init__(self)
         self._name = name
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             self._output = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=feature,
                                                                           name=scope.name+'_cross_entropy')
-            self._output = tf.reduce_mean(self._output)
+            self._output = tf.reduce_mean(input_tensor=self._output)
             self._losses.append(self._output)
 
     @property
@@ -735,18 +735,18 @@ class TripletLoss(Layer):
         self._name = name
         self._numDiff = numDiff
         self._weightDiff = weightDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos = tf.norm(group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
+            self._lossPos = tf.norm(tensor=group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
             lossDiff = 0.0
             for idx in range(2, 2+numDiff):
-                lossDiff += tf.norm(group[0] - group[idx], axis=-1)
+                lossDiff += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossDiff = tf.identity(lossDiff, name=scope.name+'_lossDiff')
-            self._output = tf.reduce_mean(tf.maximum(self._lossPos - self._weightDiff*self._lossDiff, tao), name=scope.name+'_multilet_loss')
+            self._output = tf.reduce_mean(input_tensor=tf.maximum(self._lossPos - self._weightDiff*self._lossDiff, tao), name=scope.name+'_multilet_loss')
             self._losses.append(self._output)
 
     @property
@@ -769,22 +769,22 @@ class MultiletLoss(Layer):
         self._numDiff = numDiff
         self._weightSame = weightSame
         self._weightDiff = weightDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
             lossSame = 0.0
             for idx in range(2, 2+numSame):
-                lossSame += tf.norm(group[0] - group[idx], axis=-1)
+                lossSame += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossSame = tf.identity(lossSame, name=scope.name+'_lossSame')
             lossDiff = 0.0
             for idx in range(2+numSame, 2+numSame+numDiff):
-                lossDiff += tf.norm(group[0] - group[idx], axis=-1)
+                lossDiff += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossDiff = tf.identity(lossDiff, name=scope.name+'_lossDiff')
-            self._output = tf.reduce_mean(self._lossPos - self._weightSame*self._lossSame - self._weightDiff*self._lossDiff,
+            self._output = tf.reduce_mean(input_tensor=self._lossPos - self._weightSame*self._lossSame - self._weightDiff*self._lossDiff,
                                           name=scope.name+'_multilet_loss')
             self._losses.append(self._output)
 
@@ -809,22 +809,22 @@ class MultiletLossFinal(Layer):
         self._numDiff = numDiff
         self._weightSame = weightSame
         self._weightDiff = weightDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
             lossSame = 0.0
             for idx in range(2, 2+numSame):
-                lossSame += tf.norm(group[0] - group[idx], axis=-1)
+                lossSame += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossSame = tf.identity(lossSame, name=scope.name+'_lossSame')
             lossDiff = 0.0
             for idx in range(2+numSame, 2+numSame+numDiff):
-                lossDiff += tf.norm(group[0] - group[idx], axis=-1)
+                lossDiff += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossDiff = tf.identity(lossDiff, name=scope.name+'_lossDiff')
-            self._output = tf.reduce_mean(tf.maximum(0.5*self._lossPos - 1.5*self._lossSame, tao1) +
+            self._output = tf.reduce_mean(input_tensor=tf.maximum(0.5*self._lossPos - 1.5*self._lossSame, tao1) +
                                           tf.maximum(0.5*self._lossPos - 2*self._lossDiff, tao2) +
                                           tf.maximum(0.5*self._lossSame - self._lossDiff, tao3),
                                           name=scope.name+'_multilet_loss')
@@ -852,22 +852,22 @@ class MultiletLossTruncated2(Layer):
         self._numDiff = numDiff
         self._weightSame = weightSame
         self._weightDiff = weightDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
             lossSame = 0.0
             for idx in range(2, 2+numSame):
-                lossSame += tf.norm(group[0] - group[idx], axis=-1)
+                lossSame += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossSame = tf.identity(lossSame, name=scope.name+'_lossSame')
             lossDiff = 0.0
             for idx in range(2+numSame, 2+numSame+numDiff):
-                lossDiff += tf.norm(group[0] - group[idx], axis=-1)
+                lossDiff += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossDiff = tf.identity(lossDiff, name=scope.name+'_lossDiff')
-            self._output = tf.reduce_mean(tf.maximum(0.5*self._lossPos - 2.0*self._lossSame, -2.0) +
+            self._output = tf.reduce_mean(input_tensor=tf.maximum(0.5*self._lossPos - 2.0*self._lossSame, -2.0) +
                                           tf.maximum(self._lossSame - self._lossDiff, -1.0) +
                                           tf.maximum(0.5*self._lossPos - 3.0*self._lossDiff, -5.0),
                                           name=scope.name+'_multilet_loss')
@@ -898,22 +898,22 @@ class TruncatedMultiletLoss(Layer):
         self._numDiff = numDiff
         self._weightSame = weightSame
         self._weightDiff = weightDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1, name=scope.name+'_lossPos')
             lossSame = 0.0
             for idx in range(2, 2+numSame):
-                lossSame += tf.norm(group[0] - group[idx], axis=-1)
+                lossSame += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossSame = tf.identity(lossSame, name=scope.name+'_lossSame')
             lossDiff = 0.0
             for idx in range(2+numSame, 2+numSame+numDiff):
-                lossDiff += tf.norm(group[0] - group[idx], axis=-1)
+                lossDiff += tf.norm(tensor=group[0] - group[idx], axis=-1)
             self._lossDiff = tf.identity(lossDiff, name=scope.name+'_lossDiff')
-            self._output = tf.reduce_mean(tf.maximum(0.5*self._lossPos - self._weightSame*self._lossSame, tao1) +
+            self._output = tf.reduce_mean(input_tensor=tf.maximum(0.5*self._lossPos - self._weightSame*self._lossSame, tao1) +
                                           tf.maximum(0.5*self._lossPos - self._weightDiff*self._lossDiff, tao2),
                                           name=scope.name+'_multilet_loss')
             self._losses.append(self._output)
@@ -936,27 +936,27 @@ class MultiletAccu(Layer):
         self._name = name
         self._numSame = numSame
         self._numDiff = numDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1)
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1)
             right = tf.greater_equal(self._lossPos, tf.zeros_like(self._lossPos))
             for idx in range(2, 2+numSame):
                 right = tf.logical_and(right,
-                                       tf.greater(tf.norm(group[0] - group[idx], axis=-1) - self._lossPos,
+                                       tf.greater(tf.norm(tensor=group[0] - group[idx], axis=-1) - self._lossPos,
                                                   tf.zeros_like(self._lossPos)))
             for idx in range(2+numSame, 2+numSame+numDiff):
                 right = tf.logical_and(right,
-                                       tf.greater(tf.norm(group[0] - group[idx], axis=-1) - self._lossPos,
+                                       tf.greater(tf.norm(tensor=group[0] - group[idx], axis=-1) - self._lossPos,
                                                   tf.zeros_like(self._lossPos)))
                 for jdx in range(2, 2+numSame):
                     right = tf.logical_and(right,
-                                           tf.greater(tf.norm(group[0] - group[idx], axis=-1),
-                                                      tf.norm(group[0] - group[jdx], axis=-1)))
-            self._output = tf.reduce_mean(tf.cast(right, tf.float32), name=scope.name+'_accu')
+                                           tf.greater(tf.norm(tensor=group[0] - group[idx], axis=-1),
+                                                      tf.norm(tensor=group[0] - group[jdx], axis=-1)))
+            self._output = tf.reduce_mean(input_tensor=tf.cast(right, tf.float32), name=scope.name+'_accu')
 
     @property
     def type(self):
@@ -976,19 +976,19 @@ class TripletAccu(Layer):
         self._name = name
         self._numSame = numSame
         self._numDiff = numDiff
-        with tf.variable_scope(self._name, reuse=reuse) as scope:
+        with tf.compat.v1.variable_scope(self._name, reuse=reuse) as scope:
             numPerGroup = 2 + numSame + numDiff
             reshaped = tf.reshape(feature, [-1, numPerGroup, feature.shape[1]])
             group  = tf.split(reshaped, numPerGroup, axis=1)
             for idx in range(len(group)):
                 group[idx] = tf.squeeze(group[idx])
-            self._lossPos  = tf.norm(group[0] - group[1], axis=-1)
+            self._lossPos  = tf.norm(tensor=group[0] - group[1], axis=-1)
             accum = 0.0
             for idx in range(2, 2+numSame):
-                accum = accum + tf.reduce_mean(tf.cast(tf.greater(tf.norm(group[0] - group[idx], axis=-1) - self._lossPos,
+                accum = accum + tf.reduce_mean(input_tensor=tf.cast(tf.greater(tf.norm(tensor=group[0] - group[idx], axis=-1) - self._lossPos,
                                                                   tf.zeros_like(self._lossPos)), tf.float32))
             for idx in range(2+numSame, 2+numSame+numDiff):
-                accum = accum + tf.reduce_mean(tf.cast(tf.greater(tf.norm(group[0] - group[idx], axis=-1) - self._lossPos,
+                accum = accum + tf.reduce_mean(input_tensor=tf.cast(tf.greater(tf.norm(tensor=group[0] - group[idx], axis=-1) - self._lossPos,
                                                                   tf.zeros_like(self._lossPos)), tf.float32))
             self._output = tf.identity(accum/(numSame + numDiff), name=scope.name+'_accu')
 

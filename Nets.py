@@ -16,7 +16,7 @@ class Net:
         self._saver = None
 
         self._graph = tf.Graph()
-        self._sess = tf.Session(graph=self._graph)
+        self._sess = tf.compat.v1.Session(graph=self._graph)
 
         with self._graph.as_default():
             self.training_losses = tf.Variable([], trainable=False, validate_shape=False, shape=tf.TensorShape(None),

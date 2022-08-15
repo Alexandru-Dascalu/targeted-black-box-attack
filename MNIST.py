@@ -197,15 +197,15 @@ class NetMNIST(Nets.Net):
             # variable to keep check if network is being tested or trained
             self._ifTest = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
             # define operations to set ifTest variable
-            self._phaseTrain = tf.assign(self._ifTest, False)
-            self._phaseTest = tf.assign(self._ifTest, True)
+            self._phaseTrain = tf.compat.v1.assign(self._ifTest, False)
+            self._phaseTest = tf.compat.v1.assign(self._ifTest, True)
 
             self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
 
             # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[None] + image_shape,
+            self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None] + image_shape,
                                           name='MNIST_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[None],
+            self._labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[None],
                                           name='MNIST_labels_class')
 
             # define network body
@@ -214,7 +214,7 @@ class NetMNIST(Nets.Net):
             self._inference = self.inference(self._body)
             # defines accuracy metric. checks if inference output is equal to labels, and computes an average of the
             # number of times the output is correct
-            self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
+            self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
 
             self._loss = self.loss(self._body, self._labels)
             # why reset the loss to 0 after defining it as a Tensor?
@@ -236,7 +236,7 @@ class NetMNIST(Nets.Net):
             print("\n Begin Training: \n")
 
             # Saver
-            self._saver = tf.train.Saver(max_to_keep=5)
+            self._saver = tf.compat.v1.train.Saver(max_to_keep=5)
 
     def body(self, images):
         # normalise images to -1 to 1 values
@@ -256,7 +256,7 @@ class NetMNIST(Nets.Net):
         return class10.output
 
     def inference(self, logits):
-        return tf.argmax(logits, axis=-1, name='inference')
+        return tf.argmax(input=logits, axis=-1, name='inference')
 
     def loss(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
@@ -266,17 +266,17 @@ class NetMNIST(Nets.Net):
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
             # define decaying learning rate
-            self._learning_rate = tf.train.exponential_decay(self._hyper_params['LearningRate'],
+            self._learning_rate = tf.compat.v1.train.exponential_decay(self._hyper_params['LearningRate'],
                                                              global_step=self._step,
                                                              decay_steps=self._hyper_params['DecayAfter'],
                                                              decay_rate=self._hyper_params['DecayRate'])
             self._learning_rate += self._hyper_params['MinLearningRate']
 
             # define optimiser
-            self._optimizer = tf.train.AdamOptimizer(self._learning_rate, epsilon=1e-8).minimize(self._loss,
+            self._optimizer = tf.compat.v1.train.AdamOptimizer(self._learning_rate, epsilon=1e-8).minimize(self._loss,
                                                                                                  global_step=self._step)
             # Initialize all variables
-            self._sess.run(tf.global_variables_initializer())
+            self._sess.run(tf.compat.v1.global_variables_initializer())
             # check if it should re-start training from a known checkpoint
             if path_load is not None:
                 self.load(path_load)
@@ -299,10 +299,10 @@ class NetMNIST(Nets.Net):
 
                 # self.training_losses.append(loss)
                 new_value = tf.stack([self.training_losses, tf.constant(loss)])
-                self._sess.run([tf.assign(self.training_losses, new_value)])
+                self._sess.run([tf.compat.v1.assign(self.training_losses, new_value)])
                 # self.training_accuracies.append(accu * 100)
                 self._sess.run(
-                    [tf.assign(self.training_accuracies, tf.stack([self.training_accuracies, tf.constant(accuracy)]))])
+                    [tf.compat.v1.assign(self.training_accuracies, tf.stack([self.training_accuracies, tf.constant(accuracy)]))])
 
                 # logging
                 print('\rStep: ', step, '; loss: %.3f' % loss, '; accuracy: %.3f' % accuracy, end='')

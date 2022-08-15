@@ -139,7 +139,7 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
                           biasInit=Layers.ConstInit(0.0),
                           batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                           activation=Layers.ReLU,
-                          reuse=tf.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
+                          reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv192', dtype=tf.float32)
     layers.append(net)
     subnets = []
     for idx in range(num_experts):
@@ -149,7 +149,7 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
                                  biasInit=Layers.ConstInit(0.0),
                                  batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                  activation=Layers.ReLU,
-                                 reuse=tf.AUTO_REUSE, name='G_DeConv96_' + str(idx), dtype=tf.float32)
+                                 reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv96_' + str(idx), dtype=tf.float32)
         layers.append(subnet)
         subnet = Layers.DeConv2D(subnet.output, convChannels=32,
                                  convKernel=[3, 3], convStride=[2, 2], conv_weight_decay=wd,
@@ -157,7 +157,7 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
                                  biasInit=Layers.ConstInit(0.0),
                                  batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                  activation=Layers.ReLU,
-                                 reuse=tf.AUTO_REUSE, name='G_DeConv48_' + str(idx), dtype=tf.float32)
+                                 reuse=tf.compat.v1.AUTO_REUSE, name='G_DeConv48_' + str(idx), dtype=tf.float32)
         layers.append(subnet)
         subnet = Layers.Conv2D(subnet.output, convChannels=3,
                                convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
@@ -165,7 +165,7 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
                                biasInit=Layers.ConstInit(0.0),
                                batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                                activation=Layers.ReLU,
-                               reuse=tf.AUTO_REUSE, name='G_SepConv3_' + str(idx), dtype=tf.float32)
+                               reuse=tf.compat.v1.AUTO_REUSE, name='G_SepConv3_' + str(idx), dtype=tf.float32)
         layers.append(subnet)
         subnets.append(tf.expand_dims(subnet.output, axis=-1))
     subnets = tf.concat(subnets, axis=-1)
@@ -173,10 +173,10 @@ def create_generator(images, targets, num_experts, step, ifTest, layers):
                                     wd=0.0,
                                     biasInit=Layers.ConstInit(0.0),
                                     activation=Layers.Softmax,
-                                    reuse=tf.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
+                                    reuse=tf.compat.v1.AUTO_REUSE, name='G_WeightsMoE', dtype=tf.float32)
     layers.append(weights)
-    moe = tf.transpose(tf.transpose(subnets, [1, 2, 3, 0, 4]) * weights.output, [3, 0, 1, 2, 4])
-    noises = (tf.nn.tanh(tf.reduce_sum(moe, -1)) - 0.5) * NoiseRange * 2
+    moe = tf.transpose(a=tf.transpose(a=subnets, perm=[1, 2, 3, 0, 4]) * weights.output, perm=[3, 0, 1, 2, 4])
+    noises = (tf.nn.tanh(tf.reduce_sum(input_tensor=moe, axis=-1)) - 0.5) * NoiseRange * 2
     print('Shape of Noises: ', noises.shape)
 
     return noises
@@ -310,7 +310,7 @@ def create_simulator_SimpleNet(images, step, ifTest, layers):
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
                                    biasInit=Layers.ConstInit(0.0),
                                    activation=Layers.Linear,
-                                   reuse=tf.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
+                                   reuse=tf.compat.v1.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
     layers.append(logits)
 
     return logits.output
@@ -427,12 +427,12 @@ def create_simulatorG_SimpleNet(images, step, ifTest):
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
                                    biasInit=Layers.ConstInit(0.0),
                                    activation=Layers.Linear,
-                                   reuse=tf.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
+                                   reuse=tf.compat.v1.AUTO_REUSE, name='P_FC_classes', dtype=tf.float32)
 
     return logits.output
 
 
-HParamCIFAR10 = {'BatchSize': 200,
+HParamCIFAR10 = {'BatchSize': 32,
                  'NumSubnets': 10,
                  'NumPredictor': 1,
                  'NumGenerator': 1,
@@ -457,7 +457,7 @@ class AdvNetCIFAR10(Nets.Net):
         self._init = False
         self._hyper_params = hyper_params
         self._graph = tf.Graph()
-        self._sess = tf.Session(graph=self._graph)
+        self._sess = tf.compat.v1.Session(graph=self._graph)
 
         # the targeted neural network model
         self._enemy = enemy
@@ -466,21 +466,21 @@ class AdvNetCIFAR10(Nets.Net):
             # variable to keep check if network is being tested or trained
             self._ifTest = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
             # define operations to set ifTest variable
-            self._phaseTrain = tf.assign(self._ifTest, False)
-            self._phaseTest = tf.assign(self._ifTest, True)
+            self._phaseTrain = tf.compat.v1.assign(self._ifTest, False)
+            self._phaseTest = tf.compat.v1.assign(self._ifTest, True)
 
             self._step = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
 
             # Inputs
-            self._images = tf.placeholder(dtype=tf.float32, shape=[self._hyper_params['BatchSize']] + image_shape,
+            self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[self._hyper_params['BatchSize']] + image_shape,
                                           name='CIFAR10_images')
-            self._labels = tf.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
+            self._labels = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
                                           name='CIFAR10_labels')
-            self._adversarial_targets = tf.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
+            self._adversarial_targets = tf.compat.v1.placeholder(dtype=tf.int64, shape=[self._hyper_params['BatchSize']],
                                                        name='CIFAR10_targets')
 
             # define generator
-            with tf.variable_scope('Generator', reuse=tf.AUTO_REUSE) as scope:
+            with tf.compat.v1.variable_scope('Generator', reuse=tf.compat.v1.AUTO_REUSE) as scope:
                 self._generator = create_generator(self._images, self._adversarial_targets,
                                                    self._hyper_params['NumSubnets'], self._step,
                                                    self._ifTest, self._layers)
@@ -488,7 +488,7 @@ class AdvNetCIFAR10(Nets.Net):
             self._adversarial_images = self._noises + self._images
 
             # define simulator
-            with tf.variable_scope('Predictor', reuse=tf.AUTO_REUSE) as scope:
+            with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope:
                 self._simulator = create_simulator_SimpleNet(self._images, self._step, self._ifTest, self._layers)
                 # what is the point of this??? Why is the generator training against a different simulator, which is
                 # not trained to match the target model? Why is one simulator trained on normal images, and another on
@@ -498,7 +498,7 @@ class AdvNetCIFAR10(Nets.Net):
             # define inference as hard label prediction of simulator on natural images
             self._inference = self.inference(self._simulator)
             # accuracy is how often simulator prediction matches the prediction of the target net
-            self._accuracy = tf.reduce_mean(tf.cast(tf.equal(self._inference, self._labels), tf.float32))
+            self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
 
             self._loss = 0
             for elem in self._layers:
@@ -516,15 +516,15 @@ class AdvNetCIFAR10(Nets.Net):
             self._loss_simulator = self.loss(self._simulator, self._labels, name='lossP') + self._loss
             # generator trains to produce perturbations that make the simulator produce the desired target labels
             self._loss_generator = self.loss(self._simulatorG, self._adversarial_targets, name='lossG') + \
-                                   self._hyper_params['NoiseDecay'] * tf.reduce_mean(tf.norm(self._noises)) + self._loss
+                                   self._hyper_params['NoiseDecay'] * tf.reduce_mean(input_tensor=tf.norm(tensor=self._noises)) + self._loss
             print(self.summary)
             print("\n Begin Training: \n")
 
             # Saver
-            self._saver = tf.train.Saver(max_to_keep=5)
+            self._saver = tf.compat.v1.train.Saver(max_to_keep=5)
 
     def inference(self, logits):
-        return tf.argmax(logits, axis=-1, name='inference')
+        return tf.argmax(input=logits, axis=-1, name='inference')
 
     def loss(self, logits, labels, name='cross_entropy'):
         net = Layers.CrossEntropy(logits, labels, name=name)
@@ -533,28 +533,28 @@ class AdvNetCIFAR10(Nets.Net):
 
     def train(self, training_data_generator, test_data_generator, path_load=None, path_save=None):
         with self._graph.as_default():
-            self._lr = tf.train.exponential_decay(self._hyper_params['LearningRate'],
+            self._lr = tf.compat.v1.train.exponential_decay(self._hyper_params['LearningRate'],
                                                   global_step=self._step,
                                                   decay_steps=self._hyper_params['DecayAfter'],
                                                   decay_rate=self._hyper_params['DecayRate'])
             self._lr += self._hyper_params['MinLearningRate']
 
-            self._stepInc = tf.assign(self._step, self._step + 1)
+            self._stepInc = tf.compat.v1.assign(self._step, self._step + 1)
 
-            self._varsG = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
-            self._varsS = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
+            self._varsG = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
+            self._varsS = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
 
             # define optimisers
-            self._optimizerS = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss_simulator,
+            self._optimizerS = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss_simulator,
                                                                                        var_list=self._varsS)
-            self._optimizerG = tf.train.AdamOptimizer(self._lr, epsilon=1e-8)
+            self._optimizerG = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8)
             # clip generator optimiser gradients
             gradientsG = self._optimizerG.compute_gradients(self._loss_generator, var_list=self._varsG)
             capped_gvs = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
             self._optimizerG = self._optimizerG.apply_gradients(capped_gvs)
 
             # Initialize all
-            self._sess.run(tf.global_variables_initializer())
+            self._sess.run(tf.compat.v1.global_variables_initializer())
 
             if path_load is not None:
                 self.load(path_load)
@@ -796,7 +796,10 @@ class AdvNetCIFAR10(Nets.Net):
 
 if __name__ == '__main__':
     enemy = CIFAR10.NetCIFAR10([32, 32, 3], 2)
+    tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyCIFAR10/netcifar10.ckpt-29701')
+    tf.compat.v1.enable_eager_execution()
+
     net = AdvNetCIFAR10([32, 32, 3], enemy=enemy)
     batchTrain, batchTest = CIFAR10.get_adversarial_data_generators(batch_size=HParamCIFAR10['BatchSize'],
                                                                     image_size=[32, 32, 3])
