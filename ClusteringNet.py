@@ -88,7 +88,7 @@ class NetCIFAR100(Nets.Net):
 #         net = Nets.SimpleV1(standardized, self._step, self._ifTest, self._layers)
 #         net = Nets.SimpleV2(standardized, self._step, self._ifTest, self._layers)
 #         net = Nets.SimpleV3(standardized, self._step, self._ifTest, self._layers)
-        net = Nets.SimpleV7(standardized, self._step, self._ifTest, self._layers)
+        net = Nets.ConcatNet(standardized, self._step, self._ifTest, self._layers)
 #         net = Nets.SimpleV11(standardized, self._step, self._ifTest, self._layers)
 #         net = Nets.SimpleV7X(standardized, self._step, self._ifTest, self._layers, 2)
 #         net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)

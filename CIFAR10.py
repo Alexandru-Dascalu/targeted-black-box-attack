@@ -334,7 +334,7 @@ class NetCIFAR10(Nets.Net):
         # Preprocessings
         standardized = Preproc.normalise_images(images)
         # Body
-        net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
+        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
 
         # add label for classification with 10 labels. Outputs raw logits.
         class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4,

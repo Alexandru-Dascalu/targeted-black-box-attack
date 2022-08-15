@@ -280,7 +280,7 @@ def SimpleV1(standardized, step, ifTest, layers):
     return net
 
 # has two fewer layers compared to diagram in paper, misses last two conv 128 layers
-def SimpleV1C(standardized, step, ifTest, layers): 
+def SmallNet(standardized, step, ifTest, layers):
     net = Layers.Conv2D(standardized, convChannels=64,
                         convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
                         convInit=Layers.XavierInit, convPadding='SAME',
@@ -339,7 +339,25 @@ def SimpleV1C(standardized, step, ifTest, layers):
                         biasInit=Layers.ConstInit(0.0),
                         batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
-                        name='Conv7a', dtype=tf.float32)
+                        name='Conv7', dtype=tf.float32)
+    layers.append(net)
+    toadd = net.output
+    net = Layers.Conv2D(net.output, convChannels=128,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
+                        convInit=Layers.XavierInit, convPadding='SAME',
+                        biasInit=Layers.ConstInit(0.0),
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        activation=Layers.ReLU,
+                        name='Conv8a', dtype=tf.float32)
+    layers.append(net)
+    added = toadd + net.output
+    net = Layers.Conv2D(added, convChannels=128,
+                        convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
+                        convInit=Layers.XavierInit, convPadding='SAME',
+                        biasInit=Layers.ConstInit(0.0),
+                        batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
+                        activation=Layers.ReLU,
+                        name='Conv9', dtype=tf.float32)
     layers.append(net)
     net = Layers.Conv2D(net.output, convChannels=64,
                         convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
@@ -347,7 +365,7 @@ def SimpleV1C(standardized, step, ifTest, layers):
                         biasInit=Layers.ConstInit(0.0),
                         batch_normalisation=True, step=step, ifTest=ifTest, epsilon=1e-5,
                         activation=Layers.ReLU,
-                        name='Conv7b', dtype=tf.float32)
+                        name='Conv10', dtype=tf.float32)
     layers.append(net)
     flattened = tf.reshape(net.output, [-1, net.output.shape[1]*net.output.shape[2]*net.output.shape[3]])
     net = Layers.FullyConnected(flattened, outputSize=1024, weightInit=Layers.XavierInit, wd=wd,
@@ -687,7 +705,7 @@ def SimpleV2(standardized, step, ifTest, layers):
     return net
 
 
-def SimpleV3(standardized, step, ifTest, layers):
+def SimpleNet(standardized, step, ifTest, layers):
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
                                  convInit=Layers.XavierInit, convPadding='SAME',
@@ -812,14 +830,6 @@ def SimpleV3(standardized, step, ifTest, layers):
                            activation=Layers.ReLU,
                            name='SepConv1024', dtype=tf.float32)
     layers.append(net)
-#     net = Layers.SepConv2D(net.output, convChannels=1536, \
-#                            convKernel=[3, 3], convStride=[1, 1], convWD=wd, \
-#                            convInit=Layers.XavierInit, convPadding='SAME', \
-#                            biasInit=Layers.ConstInit(0.0), \
-#                            bn=True, step=step, ifTest=ifTest, epsilon=1e-5, \
-#                            activation=Layers.ReLU, \
-#                            name='SepConv1536', dtype=tf.float32)
-#     layers.append(net)
     net = Layers.GlobalAvgPool(net.output, name='GlobalAvgPool')
     layers.append(net)
     return net
@@ -1245,7 +1255,7 @@ def SimpleV6(standardized, step, ifTest, layers):
     return net
 
 
-def SimpleV7(standardized, step, ifTest, layers, numMiddle=2):
+def ConcatNet(standardized, step, ifTest, layers, numMiddle=2):
     # why does this not have activation?
     net = Layers.DepthwiseConv2D(standardized, convChannels=3*16,
                                  convKernel=[3, 3], convStride=[1, 1], convWD=wd,
