@@ -5,7 +5,7 @@ gpu = tf.config.list_physical_devices('GPU')[0]
 tf.config.experimental.set_memory_growth(gpu, True)
 tf.config.set_logical_device_configuration(
     gpu,
-    [tf.config.LogicalDeviceConfiguration(memory_limit=7000)])
+    [tf.config.LogicalDeviceConfiguration(memory_limit=7200)])
     
 import matplotlib.pyplot as plt
 
@@ -478,7 +478,7 @@ def PredictorConcatNet(images, step, ifTest, layers):
     return logits.output
 
 
-def PredictorConcatNetG(images, step, ifTest):
+def PredictorConcatNetG(images, step, ifTest, num_middle):
     normalised_images = preproc(tf.clip_by_value(images, 0, 255))
     # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
     net = Nets.ConcatNet(normalised_images, step, ifTest, [])
@@ -488,8 +488,30 @@ def PredictorConcatNetG(images, step, ifTest):
                                    name='P_FC_classes', dtype=tf.float32)
 
     return logits.output
+    
+def PredictorXception(images, step, ifTest, layers, num_middle):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    net = Nets.Xcpetion(normalised_images, step, ifTest, layers, num_middle)
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear, reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+    layers.append(logits)
 
-HParamCIFAR10 = {'BatchSize': 200,
+    return logits.output
+
+
+def PredictorXceptionG(images, step, ifTest, num_middle):
+    normalised_images = preproc(tf.clip_by_value(images, 0, 255))
+    # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
+    net = Nets.Xcpetion(normalised_images, step, ifTest, [], num_middle)
+    logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
+                                   biasInit=Layers.ConstInit(0.0), activation=Layers.Linear,
+                                   reuse=tf.compat.v1.AUTO_REUSE,
+                                   name='P_FC_classes', dtype=tf.float32)
+
+    return logits.output
+
+HParamCIFAR10 = {'BatchSize': 100,
                  'NumSubnets': 10, 
                  'NumPredictor': 1, 
                  'NumGenerator': 1, 
@@ -533,8 +555,8 @@ class NetCIFAR10(Nets.Net):
             self._noises = self._generator
             self._adversary = self._noises + self._images
             with tf.compat.v1.variable_scope('Predictor', reuse=tf.compat.v1.AUTO_REUSE) as scope: 
-                self._predictor = PredictorConcatNet(self._images, self._step, self._ifTest, self._layers)
-                self._predictorG = PredictorConcatNetG(self._adversary, self._step, self._ifTest)
+                self._predictor = PredictorXception(self._images, self._step, self._ifTest, self._layers, numMiddle)
+                self._predictorG = PredictorXceptionG(self._adversary, self._step, self._ifTest, numMiddle)
             self._inference = self.inference(self._predictor)
             self._accuracy = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss = 0
@@ -593,7 +615,9 @@ class NetCIFAR10(Nets.Net):
             self._sess.run(tf.compat.v1.global_variables_initializer())
 
             if pathLoad is not None:
+                #tf.compat.v1.disable_eager_execution()
                 self.load(pathLoad)
+                #tf.compat.v1.enable_eager_execution()
             else:
                 print('Warming up. ')
                 for idx in range(300):
@@ -859,10 +883,6 @@ if __name__ == '__main__':
     tf.compat.v1.enable_eager_execution()
 
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
-    #tf.compat.v1.disable_eager_execution()
-    #net.load('./AttackCIFAR10/netcifar10.ckpt-9300')
-    #tf.compat.v1.enable_eager_execution()
-    
     batchTrain, batchTest = CIFAR10.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     
     #while True: 
@@ -884,6 +904,9 @@ if __name__ == '__main__':
     # Loss:  0.6553342294692993; TFR: 0.80203125; UFR: 0.89640625 after 30000
     # Loss:  0.5618793880939483 ; TFR:  0.8396875 ; UFR:  0.91234375, with decay rate 0.95 and min learning step of 2 * 10^-5, close to 0.85 result in paper.
     # Test: Loss:  0.5125626558065415 ; TFR:  0.8568000000000001 ; UFR:  0.9262999999999999 after 30000 steps with decay rate 0.95, min learning rate 2 * 10^-5 and batch 200
+    
+    # ConcatNet simulator and SmallNet target
+    # Test: Loss:  0.6571377271413803 ; TFR:  0.7969999999999997 ; UFR:  0.9055999999999998 after 29100 steps with batch 100 (batch 110 exhausts memory)
     
     # Cross Model Attack
     # SimpleV7->SimpleV7; Accu:  0.8017 ; FullRate:  0.8772000000000001
