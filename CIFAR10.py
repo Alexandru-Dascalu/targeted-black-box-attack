@@ -497,8 +497,8 @@ def generatorsAdv3(BatchSize, preprocSize=[32, 32, 3]):
 
 HParamCIFAR10 = {'BatchSize': 128,
                   'LearningRate': 1e-3, 
-                  'MinLearningRate': 1e-5, 
-                  'DecayAfter': 3000,
+                  'MinLearningRate': 2 * 1e-5, 
+                  'DecayAfter': 300,
                   'ValidateAfter': 300,
                   'TestSteps': 50,
                   'TotalSteps': 30000}
@@ -558,10 +558,10 @@ class NetCIFAR10(Nets.Net):
         # Preprocessings
         standardized = self.preproc(images)
         # Body
-        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
-        #net = Nets.SimpleV3(standardized, self._step, self._ifTest, self._layers)
+        #net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
+        #net = Nets.SimpleNet(standardized, self._step, self._ifTest, self._layers)
         #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
-        #net = Nets.SimpleV7(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
+        net = Nets.ConcatNet(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
         
         class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4, \
                                     biasInit=Layers.ConstInit(0.0), \
@@ -584,7 +584,7 @@ class NetCIFAR10(Nets.Net):
             self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], \
                                                   global_step=self._step, \
                                                   decay_steps=self._HParam['DecayAfter'], \
-                                                  decay_rate=0.3) + self._HParam['MinLearningRate']
+                                                  decay_rate=0.9) + self._HParam['MinLearningRate']
             #self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
             #self._lrDec = tf.assign(self._lr, self._lr*0.1)
             #self._lrInc = tf.assign(self._lr, self._lr*10.0)
