@@ -4,12 +4,17 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 
-import tensorflow as tf
-
 import Layers
 import Data
 import Nets
 import Preproc
+
+import tensorflow as tf
+gpu = tf.config.list_physical_devices('GPU')[0]
+tf.config.experimental.set_memory_growth(gpu, True)
+tf.config.set_logical_device_configuration(
+    gpu,
+    [tf.config.LogicalDeviceConfiguration(memory_limit=7200)])
 
 TrainSize = 50000
 TestSize  = 10000
@@ -401,6 +406,7 @@ HParamCIFAR100 = {'BatchSize': 200,
                   'LearningRate': 1e-3, 
                   'MinLearningRate': 1e-5, 
                   'DecayAfter': 300,
+                  'DecayRate': 0.9,
                   'ValidateAfter': 300,
                   'TestSteps': 100,
                   'TotalSteps': 40000}
@@ -509,8 +515,8 @@ class NetCIFAR100(Nets.Net):
         with self._graph.as_default(): 
             self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'],
                                                   global_step=self._step,
-                                                  decay_steps=self._HParam['DecayAfter']*12,
-                                                  decay_rate=0.1) + self._HParam['MinLearningRate']
+                                                  decay_steps=self._HParam['DecayAfter'],
+                                                  decay_rate=self._HParam['DecayRate']) + self._HParam['MinLearningRate']
             self._optimizer = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._loss, global_step=self._step)
             # Initialize all
             self._sess.run(tf.compat.v1.global_variables_initializer())

@@ -317,7 +317,7 @@ def SimpleV1(standardized, step, ifTest, layers):
     
     return net
 
-# has two fewer layers compared to diagram in paper, misses last two conv 128 layers
+# initially had two fewer layers compared to diagram in paper, missed last two conv 128 layers. Added them myself.
 def SmallNet(standardized, step, ifTest, layers):
     net = Layers.Conv2D(standardized, convChannels=64,
                         convKernel=[3, 3], convStride=[1, 1], conv_weight_decay=wd,
