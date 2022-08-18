@@ -603,7 +603,7 @@ class NetCIFAR10(Nets.Net):
             if pathSave is not None:
                 self.save(pathSave)
             
-            globalStep = 23100
+            globalStep = 0
             
             while globalStep < self._HParam['TotalSteps']: 
                 
