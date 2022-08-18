@@ -544,7 +544,9 @@ class NetCIFAR10(Nets.Net):
             self._sess.run(tf.compat.v1.global_variables_initializer())
             
             if pathLoad is not None:
+                tf.compat.v1.disable_eager_execution()
                 self.load(pathLoad)
+                tf.compat.v1.enable_eager_execution()
             else:
                 print('Warming up. ')
                 for idx in range(300): 
@@ -605,7 +607,7 @@ class NetCIFAR10(Nets.Net):
             if pathSave is not None:
                 self.save(pathSave)
             
-            globalStep = 0
+            globalStep = 23100
             
             while globalStep < self._HParam['TotalSteps']: 
                 
@@ -843,14 +845,18 @@ class NetCIFAR10(Nets.Net):
         self._saver.restore(self._sess, path)
 
 if __name__ == '__main__':
+    tf.compat.v1.experimental.output_all_intermediates(True)
+    
     enemy = CIFAR100.NetCIFAR100([32, 32, 3], 2)
     tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyCIFAR100/netcifar100.ckpt-32401')
     tf.compat.v1.enable_eager_execution()
     
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2) 
+    #tf.compat.v1.experimental.output_all_intermediates(False)
+    
     batchTrain, batchTest = CIFAR100.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     # print(enemy.infer(next(batchTest)[0]))
     #net.load('./AttackCIFAR100/netcifar100.ckpt-1800')
-    net.train(batchTrain, batchTest, pathSave='./AttackCIFAR100/netcifar100.ckpt')
+    net.train(batchTrain, batchTest, pathLoad='./AttackCIFAR100/netcifar100.ckpt-23100', pathSave='./AttackCIFAR100/netcifar100.ckpt')
     #net.plot(batchTest, './AttackCIFAR100/netcifar100.ckpt-16800')
