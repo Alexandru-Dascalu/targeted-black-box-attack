@@ -522,7 +522,7 @@ class NetCIFAR10(Nets.Net):
         self._layers.append(net)
         return net.output
     
-    def train(self, genTrain, genTest, warmup=False, pathSave=None):
+    def train(self, genTrain, genTest, warmup=True, pathSave=None):
         with self._graph.as_default(): 
             self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], 
                                                 global_step=self._step, \
@@ -841,21 +841,15 @@ class NetCIFAR10(Nets.Net):
         self._saver.restore(self._sess, path)
 
 if __name__ == '__main__':
-    tf.compat.v1.experimental.output_all_intermediates(True)
-    
     enemy = CIFAR100.NetCIFAR100([32, 32, 3], 2)
     tf.compat.v1.disable_eager_execution()
     enemy.load('./ClassifyCIFAR100/netcifar100.ckpt-32401')
     tf.compat.v1.enable_eager_execution()
     
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2)
-    tf.compat.v1.disable_eager_execution()
-    net.load('./AttackCIFAR100/netcifar100.ckpt-23100')
-    tf.compat.v1.enable_eager_execution()
-    #tf.compat.v1.experimental.output_all_intermediates(False)
     
     batchTrain, batchTest = CIFAR100.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     # print(enemy.infer(next(batchTest)[0]))
     #net.load('./AttackCIFAR100/netcifar100.ckpt-1800')
-    net.train(batchTrain, batchTest, warmup=False, pathSave='./AttackCIFAR100/netcifar100.ckpt')
+    net.train(batchTrain, batchTest, warmup=True, pathSave='./AttackCIFAR100/netcifar100.ckpt')
     #net.plot(batchTest, './AttackCIFAR100/netcifar100.ckpt-16800')
