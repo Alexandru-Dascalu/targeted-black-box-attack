@@ -1,6 +1,11 @@
 import random
 import numpy as np
 import tensorflow as tf
+gpu = tf.config.list_physical_devices('GPU')[0]
+#tf.config.experimental.set_memory_growth(gpu, True)
+tf.config.set_logical_device_configuration(
+    gpu,
+    [tf.config.LogicalDeviceConfiguration(memory_limit=7200)])
 import matplotlib.pyplot as plt
 
 import Layers
@@ -12,7 +17,7 @@ wd = 1e-4
 NoiseRange = 10.0
 
 
-HParamCIFAR10 = {'BatchSize': 200, 
+HParamCIFAR10 = {'BatchSize': 128, 
                  'NumSubnets': 30, 
                  'NumPredictor': 1, 
                  'NumGenerator': 1, 
@@ -20,9 +25,10 @@ HParamCIFAR10 = {'BatchSize': 200,
                  'LearningRate': 1e-3, 
                  'MinLearningRate': 1e-5, 
                  'DecayAfter': 300,
+                 'DecayRate': 0.9,
                  'ValidateAfter': 300,
-                 'TestSteps': 50,
-                 'TotalSteps': 60000}
+                 'TestSteps': 100,
+                 'TotalSteps': 30000}
 
 def preproc(images):
     # Preprocessings
@@ -518,23 +524,21 @@ class NetCIFAR10(Nets.Net):
     
     def train(self, genTrain, genTest, pathLoad=None, pathSave=None):
         with self._graph.as_default(): 
-            # self._lr = tf.train.exponential_decay(self._HParam['LearningRate'], \
-            #                                      global_step=self._step, \
-            #                                      decay_steps=self._HParam['DecayAfter'], \
-            #                                      decay_rate=1.0) + self._HParam['MinLearningRate']
-            self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
-            self._lrDecay1 = tf.compat.v1.assign(self._lr, self._lr * 0.1)
+            self._lr = tf.compat.v1.train.exponential_decay(self._HParam['LearningRate'], 
+                                                global_step=self._step, \
+                                                decay_steps=self._HParam['DecayAfter'], \
+                                                decay_rate=self._HParam['DecayRate']) + self._HParam['MinLearningRate']
+            #self._lr = tf.Variable(self._HParam['LearningRate'], trainable=False)
+            #self._lrDecay1 = tf.compat.v1.assign(self._lr, self._lr * 0.1)
             self._stepInc = tf.compat.v1.assign(self._step, self._step+1)
             self._varsG = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Generator')
             self._varsP = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES, scope='Predictor')
             self._optimizerG = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8)#tf.train.GradientDescentOptimizer(self._lr*100)
             self._optimizerP = tf.compat.v1.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
             gradientsG = self._optimizerG.compute_gradients(self._lossGenerator, var_list=self._varsG)
-            capped_gvs = [(grad, var) for grad, var in gradientsG]
-            #capped_gvs = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
+            #capped_gvs = [(grad, var) for grad, var in gradientsG]
+            capped_gvs = [(tf.clip_by_value(grad, -1.0, 1.0), var) for grad, var in gradientsG]
             self._optimizerG = self._optimizerG.apply_gradients(capped_gvs)
-            #self._optimizerG = tf.train.AdamOptimizer(self._lr*10, epsilon=1e-8).minimize(self._lossGenerator, var_list=self._varsG)
-            #self._optimizerP = tf.train.AdamOptimizer(self._lr, epsilon=1e-8).minimize(self._lossPredictor, var_list=self._varsP)
             
             # Initialize all
             self._sess.run(tf.compat.v1.global_variables_initializer())
@@ -702,9 +706,9 @@ class NetCIFAR10(Nets.Net):
                         self.save(pathSave)
                     self._sess.run([self._phaseTrain])
                 
-                if (globalStep % 10500 == 0 or globalStep % 12000 == 0): 
-                    self._sess.run(self._lrDecay1)
-                    print('Learning rate decayed. ')
+                #if (globalStep % 10500 == 0 or globalStep % 12000 == 0): 
+                #    self._sess.run(self._lrDecay1)
+                #    print('Learning rate decayed. ')
                 
     def evaluate(self, genTest, path=None):
         if path is not None:
@@ -840,7 +844,10 @@ class NetCIFAR10(Nets.Net):
 
 if __name__ == '__main__':
     enemy = CIFAR100.NetCIFAR100([32, 32, 3], 2)
-    enemy.load('./ClassifyCIFAR100/netcifar100.ckpt-5400')
+    tf.compat.v1.disable_eager_execution()
+    enemy.load('./ClassifyCIFAR100/netcifar100.ckpt-32401')
+    tf.compat.v1.enable_eager_execution()
+    
     net = NetCIFAR10([32, 32, 3], enemy=enemy, numMiddle=2) 
     batchTrain, batchTest = CIFAR100.generatorsAdv(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     # print(enemy.infer(next(batchTest)[0]))
