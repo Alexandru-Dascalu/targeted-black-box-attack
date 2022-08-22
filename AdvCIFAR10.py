@@ -5,7 +5,7 @@ gpu = tf.config.list_physical_devices('GPU')[0]
 tf.config.experimental.set_memory_growth(gpu, True)
 tf.config.set_logical_device_configuration(
     gpu,
-    [tf.config.LogicalDeviceConfiguration(memory_limit=7200)])
+    [tf.config.LogicalDeviceConfiguration(memory_limit=3800)])
     
 import matplotlib.pyplot as plt
 
@@ -890,7 +890,7 @@ if __name__ == '__main__':
         
         
     net.train(batchTrain, batchTest, pathSave='./AttackCIFAR10/netcifar10.ckpt')
-    net.plot_training_history("Adversarial CIFAR10")
+    net.plot_training_history("Adversarial CIFAR10", net._HParam['ValidateAfter'])
     #net.evaluate(batchTest, './AttackCIFAR10/netcifar10.ckpt-16500')
     #net.sample(batchTest, './AttackCIFAR10/netcifar10.ckpt-6900')
 

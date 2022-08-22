@@ -10,7 +10,7 @@ class Net:
         self._body      = None
         self._inference = None
         self._loss      = None
-        self._updataOp  = None
+        self._updateOp  = None
 
         self.generator_loss_history = []
         self.generator_accuracy_history = []
@@ -48,34 +48,24 @@ class Net:
             self.test_accuracy_history = array_dict['arr_5']
             print("Training history restored.")
 
-    def plot_training_history(self, model):
+    def plot_training_history(self, model, test_after):
         plt.plot(self.simulator_loss_history, label="Simulator")
         plt.plot(self.generator_loss_history, label="Generator")
+        test_steps = list(range(0, len(self.simulator_loss_history) + 1, test_after))
+        plt.plot(test_steps, self.test_loss_history, label="Generator Test")
         plt.xlabel("Steps")
         plt.ylabel("Loss")
         plt.title("{} loss history".format(model))
         plt.legend()
         plt.show()
 
-        plt.plot(self.test_loss_history, label="Test")
-        plt.xlabel("Steps")
-        plt.ylabel("Loss")
-        plt.title("{} test loss history".format(model))
-        plt.legend()
-        plt.show()
-
         plt.plot(self.simulator_accuracy_history, label="Simulator")
         plt.plot(self.generator_accuracy_history, label="Generator")
+        test_steps = list(range(0, len(self.simulator_accuracy_history) + 1, test_after))
+        plt.plot(test_steps, self.test_accuracy_history, label="Generator Test")
         plt.xlabel("Steps")
         plt.ylabel("TFR")
         plt.title("{} TFR history".format(model))
-        plt.legend()
-        plt.show()
-
-        plt.plot(self.test_accuracy_history, label="Test")
-        plt.xlabel("Steps")
-        plt.ylabel("TFR")
-        plt.title("{} test TFR history".format(model))
         plt.legend()
         plt.show()
     
