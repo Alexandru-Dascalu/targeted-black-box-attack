@@ -505,21 +505,13 @@ HParamCIFAR10 = {'BatchSize': 128,
 
 class NetCIFAR10(Nets.Net):
     
-    def __init__(self, shapeImages, numMiddle=2, HParam=HParamCIFAR10):
+    def __init__(self, shapeImages, architecture, HParam=HParamCIFAR10):
         Nets.Net.__init__(self)
         
         self._init = False
-        self._numMiddle    = numMiddle
         self._HParam       = HParam
-        self._graph        = tf.Graph()
-        self._sess         = tf.compat.v1.Session(graph=self._graph)
-        
-        with self._graph.as_default(): 
-            self._ifTest        = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
-            self._step          = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
-            self._phaseTrain    = tf.compat.v1.assign(self._ifTest, False)
-            self._phaseTest     = tf.compat.v1.assign(self._ifTest, True)
-            
+
+        with self._graph.as_default():
             # Inputs
             self._images = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
                                                   name='CIFAR10_images')
@@ -527,7 +519,7 @@ class NetCIFAR10(Nets.Net):
                                                   name='CIFAR10_labels_class')
             
             # Net
-            self._body      = self.body(self._images)
+            self._body      = self.body(self._images, architecture)
             self._inference = self.inference(self._body)
             self._accuracy  = tf.reduce_mean(input_tensor=tf.cast(tf.equal(self._inference, self._labels), tf.float32))
             self._loss      = self.lossClassify(self._body, self._labels)
@@ -553,20 +545,14 @@ class NetCIFAR10(Nets.Net):
         standardized  = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
             
         return standardized
-        
-    def body(self, images):
-        # Preprocessings
-        standardized = self.preproc(images)
+
+    def body(self, images, architecture, num_middle=2, for_generator=False):
         # Body
-        #net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
-        #net = Nets.SimpleNet(standardized, self._step, self._ifTest, self._layers)
-        #net = Nets.Xcpetion(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
-        net = Nets.ConcatNet(standardized, self._step, self._ifTest, self._layers, numMiddle=self._numMiddle)
-        
-        class10 = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        net_output = super().body(images, architecture, num_middle=num_middle)
+        class10 = Layers.FullyConnected(net_output, outputSize=10, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0), \
+                                        activation=Layers.Linear, \
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class10)
         
         return class10.output
@@ -663,7 +649,7 @@ class NetCIFAR10(Nets.Net):
         self._saver.restore(self._sess, path)
             
 if __name__ == '__main__':
-    net = NetCIFAR10([32, 32, 3], 2) 
+    net = NetCIFAR10([32, 32, 3], "ConcatNet")
     batchTrain, batchTest = generators(BatchSize=HParamCIFAR10['BatchSize'], preprocSize=[32, 32, 3])
     net.train(batchTrain, batchTest, pathSave='./ClassifyCIFAR10/netcifar10.ckpt')
     # net.evaluate(batchTest, path='./ClassifyCIFAR10/netcifar10.ckpt-23400')

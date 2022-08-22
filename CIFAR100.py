@@ -414,21 +414,13 @@ HParamCIFAR100 = {'BatchSize': 200,
 
 class NetCIFAR100(Nets.Net):
     
-    def __init__(self, shapeImages, numMiddle=2, HParam=HParamCIFAR100):
+    def __init__(self, shapeImages, architecture, HParam=HParamCIFAR100):
         Nets.Net.__init__(self)
         
         self._init = False
-        self._numMiddle    = numMiddle
         self._HParam       = HParam
-        self._graph        = tf.Graph()
-        self._sess         = tf.compat.v1.Session(graph=self._graph)
         
-        with self._graph.as_default(): 
-            self._ifTest        = tf.Variable(False, name='ifTest', trainable=False, dtype=tf.bool)
-            self._step          = tf.Variable(0, name='step', trainable=False, dtype=tf.int32)
-            self._phaseTrain    = tf.compat.v1.assign(self._ifTest, False)
-            self._phaseTest     = tf.compat.v1.assign(self._ifTest, True)
-            
+        with self._graph.as_default():
             # Inputs
             self._images         = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None]+shapeImages, \
                                                   name='CIFAR100_images')
@@ -438,7 +430,7 @@ class NetCIFAR100(Nets.Net):
                                                   name='CIFAR100_labels_class100')
             
             # Net
-            self._bodyClass20, self._bodyClass100 = self.body(self._images)
+            self._bodyClass20, self._bodyClass100 = self.body(self._images, architecture)
             self._inferenceClass20  = self.inference(self._bodyClass20)
             self._inferenceClass100 = self.inference(self._bodyClass100)
             self._inference = self._inferenceClass100
@@ -468,26 +460,22 @@ class NetCIFAR100(Nets.Net):
         standardized  = tf.identity(casted / 127.5 - 1.0, name='training_standardized')
             
         return standardized
-        
-    def body(self, images):
-        # Preprocessings
-        standardized = self.preproc(images)
+
+    def body(self, images, architecture, num_middle=2, for_generator=False):
         # Body
-        net = Nets.SmallNet(standardized, self._step, self._ifTest, self._layers)
-        #net = Nets.SimpleV1C(standardized, self._step, self._ifTest, self._layers)
-        
-        class20 = Layers.FullyConnected(net.output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Coarse', dtype=tf.float32)
+        net_output = super().body(images, architecture, num_middle=num_middle)
+        class20 = Layers.FullyConnected(net_output, outputSize=20, weightInit=Layers.XavierInit, wd=1e-4,
+                                        biasInit=Layers.ConstInit(0.0),
+                                        activation=Layers.Linear,
+                                        name='FC_Coarse', dtype=tf.float32)
         self._layers.append(class20)
-        class100 = Layers.FullyConnected(net.output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4, \
-                                    biasInit=Layers.ConstInit(0.0), \
-                                    activation=Layers.Linear, \
-                                    name='FC_Fine', dtype=tf.float32)
+        class100 = Layers.FullyConnected(net_output, outputSize=100, weightInit=Layers.XavierInit, wd=1e-4,
+                                         biasInit=Layers.ConstInit(0.0),
+                                         activation=Layers.Linear,
+                                         name='FC_Fine', dtype=tf.float32)
         self._layers.append(class100)
-        
-        return class20.output, class100.output 
+
+        return class20.output, class100.output
         
     def inference(self, logits):
         return tf.argmax(input=logits, axis=-1, name='inference')
@@ -649,7 +637,7 @@ class NetCIFAR100(Nets.Net):
             print('Class ', idx, ': ', dist100[idx])
             
 if __name__ == '__main__':
-    net = NetCIFAR100([32, 32, 3], 2) 
+    net = NetCIFAR100([32, 32, 3], "ConcatNet")
     batchTrain, batchTest = Data.generators(BatchSize=HParamCIFAR100['BatchSize'], preprocSize=[32, 32, 3], numSame=0, numDiff=0)
     net.train(batchTrain, batchTest, pathSave='./ClassifyCIFAR100/netcifar100.ckpt') # 10500, 11400
 # The best configuration is 64 features and 8 middle layers
