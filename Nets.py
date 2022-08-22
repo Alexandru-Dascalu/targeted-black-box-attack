@@ -2763,7 +2763,7 @@ def SimpleV7Slim(standardized, step, ifTest, layers, numMiddle=2):
     
     return net
 
-def Xcpetion(standardized, step, ifTest, layers, numMiddle=8): 
+def Xception(standardized, step, ifTest, layers, numMiddle=8):
     
     net = Layers.Conv2D(standardized, convChannels=32, \
                         convKernel=[3, 3], convStride=[1, 1], convWD=wd, \

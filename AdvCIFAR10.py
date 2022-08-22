@@ -491,7 +491,7 @@ def PredictorConcatNetG(images, step, ifTest, num_middle):
     
 def PredictorXception(images, step, ifTest, layers, num_middle):
     normalised_images = preproc(tf.clip_by_value(images, 0, 255))
-    net = Nets.Xcpetion(normalised_images, step, ifTest, layers, num_middle)
+    net = Nets.Xception(normalised_images, step, ifTest, layers, num_middle)
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
                                    biasInit=Layers.ConstInit(0.0), activation=Layers.Linear, reuse=tf.compat.v1.AUTO_REUSE,
                                    name='P_FC_classes', dtype=tf.float32)
@@ -503,7 +503,7 @@ def PredictorXception(images, step, ifTest, layers, num_middle):
 def PredictorXceptionG(images, step, ifTest, num_middle):
     normalised_images = preproc(tf.clip_by_value(images, 0, 255))
     # pass empty list for layers, for the predictorG, we do not want to add the layers to the list
-    net = Nets.Xcpetion(normalised_images, step, ifTest, [], num_middle)
+    net = Nets.Xception(normalised_images, step, ifTest, [], num_middle)
     logits = Layers.FullyConnected(net.output, outputSize=10, weightInit=Layers.XavierInit, wd=wd,
                                    biasInit=Layers.ConstInit(0.0), activation=Layers.Linear,
                                    reuse=tf.compat.v1.AUTO_REUSE,
